@@ -26,6 +26,9 @@ feature_keys: x,heights
 num_classes: 5
 batch_size: 2
 val_batch_size: 1
+# Compacted spheres have many different point counts. Repeated cuDNN
+# autotuning for nearly unique shapes costs more than it saves.
+cudnn_benchmark: false
 
 dataloader:
   num_workers: 6

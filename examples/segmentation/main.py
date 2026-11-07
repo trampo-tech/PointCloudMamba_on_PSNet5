@@ -130,6 +130,8 @@ def main(gpu, cfg):
     else:
         writer = None
     set_random_seed(cfg.seed + cfg.rank, deterministic=cfg.deterministic)
+    if cfg.get('cudnn_benchmark') is not None:
+        torch.backends.cudnn.benchmark = bool(cfg.cudnn_benchmark) and not cfg.deterministic
     torch.backends.cudnn.enabled = True
     logging.info(cfg)
 
