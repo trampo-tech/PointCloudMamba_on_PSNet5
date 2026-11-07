@@ -75,3 +75,32 @@ ResPointNet2 standalone one-vote evaluator. `final.miou` is the coverage-aware
 score. The development training configuration uses only portions of Areas 1, 2,
 and 4; a strict original-protocol benchmark requires retraining on all three
 areas with model selection completed before evaluating Area_3.
+
+## Mixed class-aware training sampler
+
+`PCM-ce-classmix.yaml` trains from scratch for 40 epochs with the weighted CE
+baseline (label smoothing 0.2, model seed 20261004). Each scheduled training
+sphere has a 25% probability of selecting a class uniformly among classes with
+eligible training centers, then choosing that class's lowest-potential point
+across all training clouds. The remaining centers use spatial coverage
+potentials. Both branches update the same potentials. The fraction is stochastic,
+not an exact per-epoch quota. Center jitter and split-buffer checks are unchanged.
+
+Validation/test retain spatial coverage sampling. Setting a nonzero
+`class_sampling_ratio` for either raises an error. The default ratio zero
+reproduces the original schedule; mixed schedules use a separate versioned cache.
+Alongside each mixed schedule, `.sampling.json` records center counts,
+class-selected center counts and valid-point exposure counts per scheduled epoch.
+Exposure excludes padding and counts repeated visits. The inherited schedule has
+100 epochs; a 40-epoch run consumes the first 40 diagnostic rows.
+
+```bash
+python examples/segmentation/main.py --cfg cfgs/psnet5/PCM-ce-classmix.yaml
+```
+
+A short shakeout with the same loss and sampler is:
+
+```bash
+python examples/segmentation/main.py --cfg cfgs/psnet5/PCM-smoke.yaml \
+  seed=20261004 cls_weighed_loss=True dataset.train.class_sampling_ratio=0.25
+```

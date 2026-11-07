@@ -25,7 +25,7 @@ class PSNet5Sphere(data.Dataset):
                  data_root, split_manifest, partition_root, cache_dir,
                  protocol='development', split='train', transform=None, seed=20260919,
                  height_mode='absolute', reference_ops_root=None,
-                 verify_source_digest=True, **kwargs):
+                 verify_source_digest=True, class_sampling_ratio=0.0, **kwargs):
         super().__init__()
         self.epoch = 0
         self.transform = transform
@@ -40,6 +40,11 @@ class PSNet5Sphere(data.Dataset):
         self.protocol = protocol
         if height_mode not in {'absolute', 'local', 'area_relative'}:
             raise ValueError(f'Unknown height_mode: {height_mode}')
+        class_sampling_ratio = float(class_sampling_ratio)
+        if not 0 <= class_sampling_ratio <= 1:
+            raise ValueError('class_sampling_ratio must be between 0 and 1')
+        if class_sampling_ratio and split != 'train':
+            raise ValueError('class_sampling_ratio is only supported for training')
         cache_path, manifest = prepare_cache(
             data_root=data_root, cache_root=cache_dir, split_manifest=split_manifest,
             partition_root=partition_root, protocol=protocol, role=split,
@@ -50,9 +55,13 @@ class PSNet5Sphere(data.Dataset):
             cloud['role'] = split
         schedule = Path(cache_path) / (
             f'schedule_r{self.in_radius:g}_n{self.num_points}_e{self.num_epochs}_s{self.num_steps}_seed{self.seed}.npz')
+        if class_sampling_ratio:
+            schedule = schedule.with_name(
+                schedule.stem + f'_classmix-v1-{class_sampling_ratio!r}' + schedule.suffix)
         self.cloud_inds, self.point_inds, self.noise = make_schedule(
             self.clouds, self.num_epochs, self.num_steps, self.in_radius,
-            self.num_points, self.seed, schedule)
+            self.num_points, self.seed, schedule,
+            class_sampling_ratio=class_sampling_ratio)
         self.sub_clouds_points = [cloud['sub_points'] for cloud in self.clouds]
         self.sub_clouds_points_labels = [cloud['sub_labels'] for cloud in self.clouds]
         if split in {'val', 'test'}:
