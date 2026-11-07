@@ -37,4 +37,3 @@ Retain weighted CE as the reference. Before adding complexity, prioritize label/
 - [Spatial error diagnosis](results/classmix_spatial_analysis/REPORT.md).
 - [Height-offset experiment](results/height_sensitivity_dev/REPORT.md).
 - [Training exposure and context](results/training_exposure_analysis/REPORT.md).
-- [Completed report cleanup](REPORT_CLEANUP_LOG.md).
