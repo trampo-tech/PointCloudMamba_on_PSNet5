@@ -1,0 +1,1348 @@
+[10/14 01:32:55] PSNet5Sphere INFO: dist_url: tcp://localhost:8888
+dist_backend: nccl
+multiprocessing_distributed: False
+ngpus_per_node: 1
+world_size: 1
+launcher: mp
+local_rank: 0
+use_gpu: True
+seed: 20261004
+epoch: 0
+epochs: 40
+ignore_index: None
+val_fn: validate
+deterministic: False
+sync_bn: False
+criterion_args:
+  NAME: MaskedCrossEntropy
+  label_smoothing: 0.2
+use_mask: False
+grad_norm_clip: 10
+layer_decay: 0
+step_per_update: 1
+start_epoch: 1
+sched_on_epoch: True
+wandb:
+  use_wandb: False
+  project: PCM-PSNet5
+  tags: ['psnet5', 'train', 'PCM-ce-weighted', 'ngpus1']
+  name: psnet5-train-PCM-ce-weighted-ngpus1-20261014-013255-RYxnShfJR67zVkme9fdFat
+use_amp: False
+use_voting: False
+val_freq: 1
+resume: False
+test: False
+finetune: False
+mode: train
+logname: None
+load_path: None
+print_freq: 50
+save_freq: -1
+root_dir: log/psnet5
+pretrained_path: None
+datatransforms:
+  train: ['PointsToTensor', 'PointCloudScaling', 'PointCloudRotation', 'PointCloudJitter', 'ChromaticDropGPU', 'ChromaticNormalize']
+  val: ['PointsToTensor', 'ChromaticNormalize']
+  vote: ['ChromaticDropGPU']
+  kwargs:
+    color_drop: 0.2
+    gravity_dim: 2
+    scale: [0.9, 1.1]
+    angle: [0, 0, 1]
+    jitter_sigma: 0.005
+    jitter_clip: 0.02
+feature_keys: x,heights
+dataset:
+  common:
+    NAME: PSNet5Sphere
+    data_root: ../ResPointNet2/data/PSNet/PSNet5
+    split_manifest: analysis/psnet5/split.json
+    partition_root: analysis/psnet5/results
+    cache_dir: data/PSNet5/processed_pcm
+    reference_ops_root: openpoints/cpp/subsampling
+    protocol: development
+    voxel_size: 0.04
+    in_radius: 2.0
+    num_points: 15000
+    seed: 20260919
+    height_mode: absolute
+    verify_source_digest: True
+  train:
+    split: train
+    num_steps: 2000
+    num_epochs: 100
+  val:
+    split: val
+    num_steps: 2000
+    num_epochs: 1
+num_classes: 5
+batch_size: 2
+val_batch_size: 1
+cudnn_benchmark: False
+dataloader:
+  num_workers: 6
+eval_bn_batch_stats: True
+validation_require_full_coverage: False
+validation_min_coverage: 0.9
+cls_weighed_loss: True
+sched: cosine
+warmup_epochs: 5
+min_lr: 1e-05
+lr: 0.0001
+optimizer:
+  NAME: adamw
+  weight_decay: 0.05
+log_dir: log/psnet5/psnet5-train-PCM-ce-weighted-ngpus1-20261014-013255-RYxnShfJR67zVkme9fdFat
+model:
+  NAME: BaseSeg
+  norm_mode: batch
+  test_crop: 15000
+  mask_padding: True
+  encoder_args:
+    NAME: PointMambaEncoder
+    in_channels: 7
+    embed_dim: 96
+    groups: 1
+    res_expansion: 1.0
+    activation: relu
+    bias: False
+    use_xyz: True
+    normalize: anchor
+    dim_expansion: [1, 2, 2, 2]
+    pre_blocks: [1, 1, 1, 1]
+    mamba_blocks: [1, 2, 2, 4]
+    pos_blocks: [0, 0, 0, 0]
+    k_neighbors: [12, 12, 12, 12]
+    reducers: [4, 4, 2, 2]
+    rms_norm: True
+    residual_in_fp32: True
+    fused_add_norm: True
+    bimamba_type: v2
+    drop_path_rate: 0.1
+    mamba_pos: True
+    mamba_layers_orders: ['xyz', 'xzy', 'yxz', 'yzx', 'zxy', 'zyx', 'hilbert', 'z', 'z-trans']
+    use_order_prompt: True
+    prompt_num_per_order: 6
+    use_windows: True
+    windows_size: [1024, 512, 256, 128]
+    grid_size: 0.04
+    combine_pos: True
+  decoder_args:
+    NAME: PointMambaDecoder
+    encoder_channel_list: [96, 96, 192, 384, 768]
+    decoder_channel_list: [384, 192, 96, 96]
+    decoder_blocks: [1, 1, 1, 1]
+    mamba_blocks: [0, 0, 0, 0]
+    mamba_layers_orders: []
+  cls_args:
+    NAME: SegHead
+    global_feat: max,avg
+    num_classes: 5
+    in_channels: None
+    norm_args:
+      norm: safebn1d
+rank: 0
+distributed: False
+mp: False
+task_name: psnet5
+cfg_basename: PCM-ce-weighted
+opts: 
+is_training: True
+run_name: psnet5-train-PCM-ce-weighted-ngpus1-20261014-013255-RYxnShfJR67zVkme9fdFat
+run_dir: log/psnet5/psnet5-train-PCM-ce-weighted-ngpus1-20261014-013255-RYxnShfJR67zVkme9fdFat
+exp_dir: log/psnet5/psnet5-train-PCM-ce-weighted-ngpus1-20261014-013255-RYxnShfJR67zVkme9fdFat
+ckpt_dir: log/psnet5/psnet5-train-PCM-ce-weighted-ngpus1-20261014-013255-RYxnShfJR67zVkme9fdFat/checkpoint
+log_path: log/psnet5/psnet5-train-PCM-ce-weighted-ngpus1-20261014-013255-RYxnShfJR67zVkme9fdFat/psnet5-train-PCM-ce-weighted-ngpus1-20261014-013255-RYxnShfJR67zVkme9fdFat.log
+cfg_path: log/psnet5/psnet5-train-PCM-ce-weighted-ngpus1-20261014-013255-RYxnShfJR67zVkme9fdFat/cfg.yaml
+[10/14 01:32:55] PSNet5Sphere INFO: BaseSeg(
+  (encoder): PointMambaEncoder(
+    (embedding): ConvBNReLU1D(
+      (act): ReLU(inplace=True)
+      (net): Sequential(
+        (0): Conv1d(7, 96, kernel_size=(1,), stride=(1,), bias=False)
+        (1): SingletonSafeBatchNorm1d(96, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+        (2): ReLU(inplace=True)
+      )
+    )
+    (order_prompt): Embedding(54, 384)
+    (pos_proj): ModuleList(
+      (0): Linear(in_features=3, out_features=96, bias=False)
+      (1): Linear(in_features=3, out_features=192, bias=False)
+      (2): Linear(in_features=3, out_features=384, bias=False)
+      (3): Linear(in_features=3, out_features=768, bias=False)
+    )
+    (local_grouper_list): ModuleList(
+      (0-3): 4 x LocalGrouper()
+    )
+    (pre_blocks_list): ModuleList(
+      (0): PreExtraction(
+        (transfer): ConvBNReLU1D(
+          (act): ReLU(inplace=True)
+          (net): Sequential(
+            (0): Conv1d(195, 96, kernel_size=(1,), stride=(1,), bias=False)
+            (1): SingletonSafeBatchNorm1d(96, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+            (2): ReLU(inplace=True)
+          )
+        )
+        (operation): Sequential(
+          (0): ConvBNReLURes1D(
+            (act): ReLU(inplace=True)
+            (net1): Sequential(
+              (0): Conv1d(96, 96, kernel_size=(1,), stride=(1,), bias=False)
+              (1): SingletonSafeBatchNorm1d(96, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+              (2): ReLU(inplace=True)
+            )
+            (net2): Sequential(
+              (0): Conv1d(96, 96, kernel_size=(1,), stride=(1,), bias=False)
+              (1): SingletonSafeBatchNorm1d(96, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+            )
+          )
+        )
+      )
+      (1): PreExtraction(
+        (transfer): ConvBNReLU1D(
+          (act): ReLU(inplace=True)
+          (net): Sequential(
+            (0): Conv1d(195, 192, kernel_size=(1,), stride=(1,), bias=False)
+            (1): SingletonSafeBatchNorm1d(192, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+            (2): ReLU(inplace=True)
+          )
+        )
+        (operation): Sequential(
+          (0): ConvBNReLURes1D(
+            (act): ReLU(inplace=True)
+            (net1): Sequential(
+              (0): Conv1d(192, 192, kernel_size=(1,), stride=(1,), bias=False)
+              (1): SingletonSafeBatchNorm1d(192, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+              (2): ReLU(inplace=True)
+            )
+            (net2): Sequential(
+              (0): Conv1d(192, 192, kernel_size=(1,), stride=(1,), bias=False)
+              (1): SingletonSafeBatchNorm1d(192, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+            )
+          )
+        )
+      )
+      (2): PreExtraction(
+        (transfer): ConvBNReLU1D(
+          (act): ReLU(inplace=True)
+          (net): Sequential(
+            (0): Conv1d(387, 384, kernel_size=(1,), stride=(1,), bias=False)
+            (1): SingletonSafeBatchNorm1d(384, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+            (2): ReLU(inplace=True)
+          )
+        )
+        (operation): Sequential(
+          (0): ConvBNReLURes1D(
+            (act): ReLU(inplace=True)
+            (net1): Sequential(
+              (0): Conv1d(384, 384, kernel_size=(1,), stride=(1,), bias=False)
+              (1): SingletonSafeBatchNorm1d(384, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+              (2): ReLU(inplace=True)
+            )
+            (net2): Sequential(
+              (0): Conv1d(384, 384, kernel_size=(1,), stride=(1,), bias=False)
+              (1): SingletonSafeBatchNorm1d(384, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+            )
+          )
+        )
+      )
+      (3): PreExtraction(
+        (transfer): ConvBNReLU1D(
+          (act): ReLU(inplace=True)
+          (net): Sequential(
+            (0): Conv1d(771, 768, kernel_size=(1,), stride=(1,), bias=False)
+            (1): SingletonSafeBatchNorm1d(768, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+            (2): ReLU(inplace=True)
+          )
+        )
+        (operation): Sequential(
+          (0): ConvBNReLURes1D(
+            (act): ReLU(inplace=True)
+            (net1): Sequential(
+              (0): Conv1d(768, 768, kernel_size=(1,), stride=(1,), bias=False)
+              (1): SingletonSafeBatchNorm1d(768, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+              (2): ReLU(inplace=True)
+            )
+            (net2): Sequential(
+              (0): Conv1d(768, 768, kernel_size=(1,), stride=(1,), bias=False)
+              (1): SingletonSafeBatchNorm1d(768, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+            )
+          )
+        )
+      )
+    )
+    (mamba_blocks_list): ModuleList(
+      (0): Sequential(
+        (0): MambaBlock(
+          (mixer): Mamba(
+            (in_proj): Linear(in_features=96, out_features=384, bias=False)
+            (conv1d): Conv1d(192, 192, kernel_size=(4,), stride=(1,), padding=(3,), groups=192)
+            (act): SiLU()
+            (x_proj): Linear(in_features=192, out_features=38, bias=False)
+            (dt_proj): Linear(in_features=6, out_features=192, bias=True)
+            (conv1d_b): Conv1d(192, 192, kernel_size=(4,), stride=(1,), padding=(3,), groups=192)
+            (x_proj_b): Linear(in_features=192, out_features=38, bias=False)
+            (dt_proj_b): Linear(in_features=6, out_features=192, bias=True)
+            (out_proj): Linear(in_features=192, out_features=96, bias=False)
+          )
+          (norm): RMSNorm()
+          (drop_path): Identity()
+        )
+      )
+      (1): Sequential(
+        (0): MambaBlock(
+          (mixer): Mamba(
+            (in_proj): Linear(in_features=192, out_features=768, bias=False)
+            (conv1d): Conv1d(384, 384, kernel_size=(4,), stride=(1,), padding=(3,), groups=384)
+            (act): SiLU()
+            (x_proj): Linear(in_features=384, out_features=44, bias=False)
+            (dt_proj): Linear(in_features=12, out_features=384, bias=True)
+            (conv1d_b): Conv1d(384, 384, kernel_size=(4,), stride=(1,), padding=(3,), groups=384)
+            (x_proj_b): Linear(in_features=384, out_features=44, bias=False)
+            (dt_proj_b): Linear(in_features=12, out_features=384, bias=True)
+            (out_proj): Linear(in_features=384, out_features=192, bias=False)
+          )
+          (norm): RMSNorm()
+          (drop_path): Identity()
+        )
+        (1): MambaBlock(
+          (mixer): Mamba(
+            (in_proj): Linear(in_features=192, out_features=768, bias=False)
+            (conv1d): Conv1d(384, 384, kernel_size=(4,), stride=(1,), padding=(3,), groups=384)
+            (act): SiLU()
+            (x_proj): Linear(in_features=384, out_features=44, bias=False)
+            (dt_proj): Linear(in_features=12, out_features=384, bias=True)
+            (conv1d_b): Conv1d(384, 384, kernel_size=(4,), stride=(1,), padding=(3,), groups=384)
+            (x_proj_b): Linear(in_features=384, out_features=44, bias=False)
+            (dt_proj_b): Linear(in_features=12, out_features=384, bias=True)
+            (out_proj): Linear(in_features=384, out_features=192, bias=False)
+          )
+          (norm): RMSNorm()
+          (drop_path): DropPath(drop_prob=0.013)
+        )
+      )
+      (2): Sequential(
+        (0): MambaBlock(
+          (mixer): Mamba(
+            (in_proj): Linear(in_features=384, out_features=1536, bias=False)
+            (conv1d): Conv1d(768, 768, kernel_size=(4,), stride=(1,), padding=(3,), groups=768)
+            (act): SiLU()
+            (x_proj): Linear(in_features=768, out_features=56, bias=False)
+            (dt_proj): Linear(in_features=24, out_features=768, bias=True)
+            (conv1d_b): Conv1d(768, 768, kernel_size=(4,), stride=(1,), padding=(3,), groups=768)
+            (x_proj_b): Linear(in_features=768, out_features=56, bias=False)
+            (dt_proj_b): Linear(in_features=24, out_features=768, bias=True)
+            (out_proj): Linear(in_features=768, out_features=384, bias=False)
+          )
+          (norm): RMSNorm()
+          (drop_path): DropPath(drop_prob=0.025)
+        )
+        (1): MambaBlock(
+          (mixer): Mamba(
+            (in_proj): Linear(in_features=384, out_features=1536, bias=False)
+            (conv1d): Conv1d(768, 768, kernel_size=(4,), stride=(1,), padding=(3,), groups=768)
+            (act): SiLU()
+            (x_proj): Linear(in_features=768, out_features=56, bias=False)
+            (dt_proj): Linear(in_features=24, out_features=768, bias=True)
+            (conv1d_b): Conv1d(768, 768, kernel_size=(4,), stride=(1,), padding=(3,), groups=768)
+            (x_proj_b): Linear(in_features=768, out_features=56, bias=False)
+            (dt_proj_b): Linear(in_features=24, out_features=768, bias=True)
+            (out_proj): Linear(in_features=768, out_features=384, bias=False)
+          )
+          (norm): RMSNorm()
+          (drop_path): DropPath(drop_prob=0.038)
+        )
+      )
+      (3): Sequential(
+        (0): MambaBlock(
+          (mixer): Mamba(
+            (in_proj): Linear(in_features=768, out_features=3072, bias=False)
+            (conv1d): Conv1d(1536, 1536, kernel_size=(4,), stride=(1,), padding=(3,), groups=1536)
+            (act): SiLU()
+            (x_proj): Linear(in_features=1536, out_features=80, bias=False)
+            (dt_proj): Linear(in_features=48, out_features=1536, bias=True)
+            (conv1d_b): Conv1d(1536, 1536, kernel_size=(4,), stride=(1,), padding=(3,), groups=1536)
+            (x_proj_b): Linear(in_features=1536, out_features=80, bias=False)
+            (dt_proj_b): Linear(in_features=48, out_features=1536, bias=True)
+            (out_proj): Linear(in_features=1536, out_features=768, bias=False)
+          )
+          (norm): RMSNorm()
+          (drop_path): DropPath(drop_prob=0.050)
+        )
+        (1): MambaBlock(
+          (mixer): Mamba(
+            (in_proj): Linear(in_features=768, out_features=3072, bias=False)
+            (conv1d): Conv1d(1536, 1536, kernel_size=(4,), stride=(1,), padding=(3,), groups=1536)
+            (act): SiLU()
+            (x_proj): Linear(in_features=1536, out_features=80, bias=False)
+            (dt_proj): Linear(in_features=48, out_features=1536, bias=True)
+            (conv1d_b): Conv1d(1536, 1536, kernel_size=(4,), stride=(1,), padding=(3,), groups=1536)
+            (x_proj_b): Linear(in_features=1536, out_features=80, bias=False)
+            (dt_proj_b): Linear(in_features=48, out_features=1536, bias=True)
+            (out_proj): Linear(in_features=1536, out_features=768, bias=False)
+          )
+          (norm): RMSNorm()
+          (drop_path): DropPath(drop_prob=0.062)
+        )
+        (2): MambaBlock(
+          (mixer): Mamba(
+            (in_proj): Linear(in_features=768, out_features=3072, bias=False)
+            (conv1d): Conv1d(1536, 1536, kernel_size=(4,), stride=(1,), padding=(3,), groups=1536)
+            (act): SiLU()
+            (x_proj): Linear(in_features=1536, out_features=80, bias=False)
+            (dt_proj): Linear(in_features=48, out_features=1536, bias=True)
+            (conv1d_b): Conv1d(1536, 1536, kernel_size=(4,), stride=(1,), padding=(3,), groups=1536)
+            (x_proj_b): Linear(in_features=1536, out_features=80, bias=False)
+            (dt_proj_b): Linear(in_features=48, out_features=1536, bias=True)
+            (out_proj): Linear(in_features=1536, out_features=768, bias=False)
+          )
+          (norm): RMSNorm()
+          (drop_path): DropPath(drop_prob=0.075)
+        )
+        (3): MambaBlock(
+          (mixer): Mamba(
+            (in_proj): Linear(in_features=768, out_features=3072, bias=False)
+            (conv1d): Conv1d(1536, 1536, kernel_size=(4,), stride=(1,), padding=(3,), groups=1536)
+            (act): SiLU()
+            (x_proj): Linear(in_features=1536, out_features=80, bias=False)
+            (dt_proj): Linear(in_features=48, out_features=1536, bias=True)
+            (conv1d_b): Conv1d(1536, 1536, kernel_size=(4,), stride=(1,), padding=(3,), groups=1536)
+            (x_proj_b): Linear(in_features=1536, out_features=80, bias=False)
+            (dt_proj_b): Linear(in_features=48, out_features=1536, bias=True)
+            (out_proj): Linear(in_features=1536, out_features=768, bias=False)
+          )
+          (norm): RMSNorm()
+          (drop_path): DropPath(drop_prob=0.087)
+        )
+      )
+    )
+    (pos_blocks_list): ModuleList(
+      (0-3): 4 x Identity()
+    )
+    (residual_proj_blocks_list): ModuleList(
+      (0): Identity()
+      (1): Linear(in_features=96, out_features=192, bias=False)
+      (2): Linear(in_features=192, out_features=384, bias=False)
+      (3): Linear(in_features=384, out_features=768, bias=False)
+    )
+    (order_prompt_proj): ModuleList(
+      (0): Linear(in_features=384, out_features=96, bias=False)
+      (1): Linear(in_features=384, out_features=192, bias=False)
+      (2): Linear(in_features=384, out_features=384, bias=False)
+      (3): Linear(in_features=384, out_features=768, bias=False)
+    )
+    (act): ReLU(inplace=True)
+  )
+  (decoder): PointMambaDecoder(
+    (decode_list): ModuleList(
+      (0): PointNetFeaturePropagation(
+        (fuse): ConvBNReLU1D(
+          (act): ReLU(inplace=True)
+          (net): Sequential(
+            (0): Conv1d(1152, 384, kernel_size=(1,), stride=(1,))
+            (1): SingletonSafeBatchNorm1d(384, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+            (2): ReLU(inplace=True)
+          )
+        )
+        (extraction): PosExtraction(
+          (operation): Sequential(
+            (0): ConvBNReLURes1D(
+              (act): ReLU(inplace=True)
+              (net1): Sequential(
+                (0): Conv1d(384, 384, kernel_size=(1,), stride=(1,))
+                (1): SingletonSafeBatchNorm1d(384, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+                (2): ReLU(inplace=True)
+              )
+              (net2): Sequential(
+                (0): Conv1d(384, 384, kernel_size=(1,), stride=(1,))
+                (1): SingletonSafeBatchNorm1d(384, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+              )
+            )
+          )
+        )
+      )
+      (1): PointNetFeaturePropagation(
+        (fuse): ConvBNReLU1D(
+          (act): ReLU(inplace=True)
+          (net): Sequential(
+            (0): Conv1d(576, 192, kernel_size=(1,), stride=(1,))
+            (1): SingletonSafeBatchNorm1d(192, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+            (2): ReLU(inplace=True)
+          )
+        )
+        (extraction): PosExtraction(
+          (operation): Sequential(
+            (0): ConvBNReLURes1D(
+              (act): ReLU(inplace=True)
+              (net1): Sequential(
+                (0): Conv1d(192, 192, kernel_size=(1,), stride=(1,))
+                (1): SingletonSafeBatchNorm1d(192, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+                (2): ReLU(inplace=True)
+              )
+              (net2): Sequential(
+                (0): Conv1d(192, 192, kernel_size=(1,), stride=(1,))
+                (1): SingletonSafeBatchNorm1d(192, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+              )
+            )
+          )
+        )
+      )
+      (2): PointNetFeaturePropagation(
+        (fuse): ConvBNReLU1D(
+          (act): ReLU(inplace=True)
+          (net): Sequential(
+            (0): Conv1d(288, 96, kernel_size=(1,), stride=(1,))
+            (1): SingletonSafeBatchNorm1d(96, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+            (2): ReLU(inplace=True)
+          )
+        )
+        (extraction): PosExtraction(
+          (operation): Sequential(
+            (0): ConvBNReLURes1D(
+              (act): ReLU(inplace=True)
+              (net1): Sequential(
+                (0): Conv1d(96, 96, kernel_size=(1,), stride=(1,))
+                (1): SingletonSafeBatchNorm1d(96, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+                (2): ReLU(inplace=True)
+              )
+              (net2): Sequential(
+                (0): Conv1d(96, 96, kernel_size=(1,), stride=(1,))
+                (1): SingletonSafeBatchNorm1d(96, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+              )
+            )
+          )
+        )
+      )
+      (3): PointNetFeaturePropagation(
+        (fuse): ConvBNReLU1D(
+          (act): ReLU(inplace=True)
+          (net): Sequential(
+            (0): Conv1d(192, 96, kernel_size=(1,), stride=(1,))
+            (1): SingletonSafeBatchNorm1d(96, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+            (2): ReLU(inplace=True)
+          )
+        )
+        (extraction): PosExtraction(
+          (operation): Sequential(
+            (0): ConvBNReLURes1D(
+              (act): ReLU(inplace=True)
+              (net1): Sequential(
+                (0): Conv1d(96, 96, kernel_size=(1,), stride=(1,))
+                (1): SingletonSafeBatchNorm1d(96, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+                (2): ReLU(inplace=True)
+              )
+              (net2): Sequential(
+                (0): Conv1d(96, 96, kernel_size=(1,), stride=(1,))
+                (1): SingletonSafeBatchNorm1d(96, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+              )
+            )
+          )
+        )
+      )
+    )
+    (mamba_list): ModuleList(
+      (0-3): 4 x Sequential()
+    )
+    (act): ReLU(inplace=True)
+    (gmp_map_list): ModuleList(
+      (0): ConvBNReLU1D(
+        (act): ReLU(inplace=True)
+        (net): Sequential(
+          (0): Conv1d(768, 64, kernel_size=(1,), stride=(1,), bias=False)
+          (1): SingletonSafeBatchNorm1d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+          (2): ReLU(inplace=True)
+        )
+      )
+      (1): ConvBNReLU1D(
+        (act): ReLU(inplace=True)
+        (net): Sequential(
+          (0): Conv1d(384, 64, kernel_size=(1,), stride=(1,), bias=False)
+          (1): SingletonSafeBatchNorm1d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+          (2): ReLU(inplace=True)
+        )
+      )
+      (2): ConvBNReLU1D(
+        (act): ReLU(inplace=True)
+        (net): Sequential(
+          (0): Conv1d(192, 64, kernel_size=(1,), stride=(1,), bias=False)
+          (1): SingletonSafeBatchNorm1d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+          (2): ReLU(inplace=True)
+        )
+      )
+      (3-4): 2 x ConvBNReLU1D(
+        (act): ReLU(inplace=True)
+        (net): Sequential(
+          (0): Conv1d(96, 64, kernel_size=(1,), stride=(1,), bias=False)
+          (1): SingletonSafeBatchNorm1d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+          (2): ReLU(inplace=True)
+        )
+      )
+    )
+    (gmp_map_end): ConvBNReLU1D(
+      (act): ReLU(inplace=True)
+      (net): Sequential(
+        (0): Conv1d(320, 64, kernel_size=(1,), stride=(1,), bias=False)
+        (1): SingletonSafeBatchNorm1d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+        (2): ReLU(inplace=True)
+      )
+    )
+  )
+  (head): SegHead(
+    (head): Sequential(
+      (0): Sequential(
+        (0): Conv1d(480, 480, kernel_size=(1,), stride=(1,), bias=False)
+        (1): SingletonSafeBatchNorm1d(480, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+        (2): ReLU(inplace=True)
+      )
+      (1): Dropout(p=0.5, inplace=False)
+      (2): Sequential(
+        (0): Conv1d(480, 5, kernel_size=(1,), stride=(1,))
+      )
+    )
+  )
+)
+[10/14 01:32:55] PSNet5Sphere INFO: Number of params: 23.4507 M
+[10/14 01:32:55] PSNet5Sphere INFO: Param groups = {
+  "decay": {
+    "weight_decay": 0.05,
+    "params": [
+      "encoder.embedding.net.0.weight",
+      "encoder.order_prompt.weight",
+      "encoder.pos_proj.0.weight",
+      "encoder.pos_proj.1.weight",
+      "encoder.pos_proj.2.weight",
+      "encoder.pos_proj.3.weight",
+      "encoder.local_grouper_list.0.affine_alpha",
+      "encoder.local_grouper_list.0.affine_beta",
+      "encoder.local_grouper_list.1.affine_alpha",
+      "encoder.local_grouper_list.1.affine_beta",
+      "encoder.local_grouper_list.2.affine_alpha",
+      "encoder.local_grouper_list.2.affine_beta",
+      "encoder.local_grouper_list.3.affine_alpha",
+      "encoder.local_grouper_list.3.affine_beta",
+      "encoder.pre_blocks_list.0.transfer.net.0.weight",
+      "encoder.pre_blocks_list.0.operation.0.net1.0.weight",
+      "encoder.pre_blocks_list.0.operation.0.net2.0.weight",
+      "encoder.pre_blocks_list.1.transfer.net.0.weight",
+      "encoder.pre_blocks_list.1.operation.0.net1.0.weight",
+      "encoder.pre_blocks_list.1.operation.0.net2.0.weight",
+      "encoder.pre_blocks_list.2.transfer.net.0.weight",
+      "encoder.pre_blocks_list.2.operation.0.net1.0.weight",
+      "encoder.pre_blocks_list.2.operation.0.net2.0.weight",
+      "encoder.pre_blocks_list.3.transfer.net.0.weight",
+      "encoder.pre_blocks_list.3.operation.0.net1.0.weight",
+      "encoder.pre_blocks_list.3.operation.0.net2.0.weight",
+      "encoder.mamba_blocks_list.0.0.mixer.A_log",
+      "encoder.mamba_blocks_list.0.0.mixer.A_b_log",
+      "encoder.mamba_blocks_list.0.0.mixer.in_proj.weight",
+      "encoder.mamba_blocks_list.0.0.mixer.conv1d.weight",
+      "encoder.mamba_blocks_list.0.0.mixer.x_proj.weight",
+      "encoder.mamba_blocks_list.0.0.mixer.dt_proj.weight",
+      "encoder.mamba_blocks_list.0.0.mixer.conv1d_b.weight",
+      "encoder.mamba_blocks_list.0.0.mixer.x_proj_b.weight",
+      "encoder.mamba_blocks_list.0.0.mixer.dt_proj_b.weight",
+      "encoder.mamba_blocks_list.0.0.mixer.out_proj.weight",
+      "encoder.mamba_blocks_list.1.0.mixer.A_log",
+      "encoder.mamba_blocks_list.1.0.mixer.A_b_log",
+      "encoder.mamba_blocks_list.1.0.mixer.in_proj.weight",
+      "encoder.mamba_blocks_list.1.0.mixer.conv1d.weight",
+      "encoder.mamba_blocks_list.1.0.mixer.x_proj.weight",
+      "encoder.mamba_blocks_list.1.0.mixer.dt_proj.weight",
+      "encoder.mamba_blocks_list.1.0.mixer.conv1d_b.weight",
+      "encoder.mamba_blocks_list.1.0.mixer.x_proj_b.weight",
+      "encoder.mamba_blocks_list.1.0.mixer.dt_proj_b.weight",
+      "encoder.mamba_blocks_list.1.0.mixer.out_proj.weight",
+      "encoder.mamba_blocks_list.1.1.mixer.A_log",
+      "encoder.mamba_blocks_list.1.1.mixer.A_b_log",
+      "encoder.mamba_blocks_list.1.1.mixer.in_proj.weight",
+      "encoder.mamba_blocks_list.1.1.mixer.conv1d.weight",
+      "encoder.mamba_blocks_list.1.1.mixer.x_proj.weight",
+      "encoder.mamba_blocks_list.1.1.mixer.dt_proj.weight",
+      "encoder.mamba_blocks_list.1.1.mixer.conv1d_b.weight",
+      "encoder.mamba_blocks_list.1.1.mixer.x_proj_b.weight",
+      "encoder.mamba_blocks_list.1.1.mixer.dt_proj_b.weight",
+      "encoder.mamba_blocks_list.1.1.mixer.out_proj.weight",
+      "encoder.mamba_blocks_list.2.0.mixer.A_log",
+      "encoder.mamba_blocks_list.2.0.mixer.A_b_log",
+      "encoder.mamba_blocks_list.2.0.mixer.in_proj.weight",
+      "encoder.mamba_blocks_list.2.0.mixer.conv1d.weight",
+      "encoder.mamba_blocks_list.2.0.mixer.x_proj.weight",
+      "encoder.mamba_blocks_list.2.0.mixer.dt_proj.weight",
+      "encoder.mamba_blocks_list.2.0.mixer.conv1d_b.weight",
+      "encoder.mamba_blocks_list.2.0.mixer.x_proj_b.weight",
+      "encoder.mamba_blocks_list.2.0.mixer.dt_proj_b.weight",
+      "encoder.mamba_blocks_list.2.0.mixer.out_proj.weight",
+      "encoder.mamba_blocks_list.2.1.mixer.A_log",
+      "encoder.mamba_blocks_list.2.1.mixer.A_b_log",
+      "encoder.mamba_blocks_list.2.1.mixer.in_proj.weight",
+      "encoder.mamba_blocks_list.2.1.mixer.conv1d.weight",
+      "encoder.mamba_blocks_list.2.1.mixer.x_proj.weight",
+      "encoder.mamba_blocks_list.2.1.mixer.dt_proj.weight",
+      "encoder.mamba_blocks_list.2.1.mixer.conv1d_b.weight",
+      "encoder.mamba_blocks_list.2.1.mixer.x_proj_b.weight",
+      "encoder.mamba_blocks_list.2.1.mixer.dt_proj_b.weight",
+      "encoder.mamba_blocks_list.2.1.mixer.out_proj.weight",
+      "encoder.mamba_blocks_list.3.0.mixer.A_log",
+      "encoder.mamba_blocks_list.3.0.mixer.A_b_log",
+      "encoder.mamba_blocks_list.3.0.mixer.in_proj.weight",
+      "encoder.mamba_blocks_list.3.0.mixer.conv1d.weight",
+      "encoder.mamba_blocks_list.3.0.mixer.x_proj.weight",
+      "encoder.mamba_blocks_list.3.0.mixer.dt_proj.weight",
+      "encoder.mamba_blocks_list.3.0.mixer.conv1d_b.weight",
+      "encoder.mamba_blocks_list.3.0.mixer.x_proj_b.weight",
+      "encoder.mamba_blocks_list.3.0.mixer.dt_proj_b.weight",
+      "encoder.mamba_blocks_list.3.0.mixer.out_proj.weight",
+      "encoder.mamba_blocks_list.3.1.mixer.A_log",
+      "encoder.mamba_blocks_list.3.1.mixer.A_b_log",
+      "encoder.mamba_blocks_list.3.1.mixer.in_proj.weight",
+      "encoder.mamba_blocks_list.3.1.mixer.conv1d.weight",
+      "encoder.mamba_blocks_list.3.1.mixer.x_proj.weight",
+      "encoder.mamba_blocks_list.3.1.mixer.dt_proj.weight",
+      "encoder.mamba_blocks_list.3.1.mixer.conv1d_b.weight",
+      "encoder.mamba_blocks_list.3.1.mixer.x_proj_b.weight",
+      "encoder.mamba_blocks_list.3.1.mixer.dt_proj_b.weight",
+      "encoder.mamba_blocks_list.3.1.mixer.out_proj.weight",
+      "encoder.mamba_blocks_list.3.2.mixer.A_log",
+      "encoder.mamba_blocks_list.3.2.mixer.A_b_log",
+      "encoder.mamba_blocks_list.3.2.mixer.in_proj.weight",
+      "encoder.mamba_blocks_list.3.2.mixer.conv1d.weight",
+      "encoder.mamba_blocks_list.3.2.mixer.x_proj.weight",
+      "encoder.mamba_blocks_list.3.2.mixer.dt_proj.weight",
+      "encoder.mamba_blocks_list.3.2.mixer.conv1d_b.weight",
+      "encoder.mamba_blocks_list.3.2.mixer.x_proj_b.weight",
+      "encoder.mamba_blocks_list.3.2.mixer.dt_proj_b.weight",
+      "encoder.mamba_blocks_list.3.2.mixer.out_proj.weight",
+      "encoder.mamba_blocks_list.3.3.mixer.A_log",
+      "encoder.mamba_blocks_list.3.3.mixer.A_b_log",
+      "encoder.mamba_blocks_list.3.3.mixer.in_proj.weight",
+      "encoder.mamba_blocks_list.3.3.mixer.conv1d.weight",
+      "encoder.mamba_blocks_list.3.3.mixer.x_proj.weight",
+      "encoder.mamba_blocks_list.3.3.mixer.dt_proj.weight",
+      "encoder.mamba_blocks_list.3.3.mixer.conv1d_b.weight",
+      "encoder.mamba_blocks_list.3.3.mixer.x_proj_b.weight",
+      "encoder.mamba_blocks_list.3.3.mixer.dt_proj_b.weight",
+      "encoder.mamba_blocks_list.3.3.mixer.out_proj.weight",
+      "encoder.residual_proj_blocks_list.1.weight",
+      "encoder.residual_proj_blocks_list.2.weight",
+      "encoder.residual_proj_blocks_list.3.weight",
+      "encoder.order_prompt_proj.0.weight",
+      "encoder.order_prompt_proj.1.weight",
+      "encoder.order_prompt_proj.2.weight",
+      "encoder.order_prompt_proj.3.weight",
+      "decoder.decode_list.0.fuse.net.0.weight",
+      "decoder.decode_list.0.extraction.operation.0.net1.0.weight",
+      "decoder.decode_list.0.extraction.operation.0.net2.0.weight",
+      "decoder.decode_list.1.fuse.net.0.weight",
+      "decoder.decode_list.1.extraction.operation.0.net1.0.weight",
+      "decoder.decode_list.1.extraction.operation.0.net2.0.weight",
+      "decoder.decode_list.2.fuse.net.0.weight",
+      "decoder.decode_list.2.extraction.operation.0.net1.0.weight",
+      "decoder.decode_list.2.extraction.operation.0.net2.0.weight",
+      "decoder.decode_list.3.fuse.net.0.weight",
+      "decoder.decode_list.3.extraction.operation.0.net1.0.weight",
+      "decoder.decode_list.3.extraction.operation.0.net2.0.weight",
+      "decoder.gmp_map_list.0.net.0.weight",
+      "decoder.gmp_map_list.1.net.0.weight",
+      "decoder.gmp_map_list.2.net.0.weight",
+      "decoder.gmp_map_list.3.net.0.weight",
+      "decoder.gmp_map_list.4.net.0.weight",
+      "decoder.gmp_map_end.net.0.weight",
+      "head.head.0.0.weight",
+      "head.head.2.0.weight"
+    ],
+    "lr_scale": 1.0
+  },
+  "no_decay": {
+    "weight_decay": 0.0,
+    "params": [
+      "encoder.embedding.net.1.weight",
+      "encoder.embedding.net.1.bias",
+      "encoder.pre_blocks_list.0.transfer.net.1.weight",
+      "encoder.pre_blocks_list.0.transfer.net.1.bias",
+      "encoder.pre_blocks_list.0.operation.0.net1.1.weight",
+      "encoder.pre_blocks_list.0.operation.0.net1.1.bias",
+      "encoder.pre_blocks_list.0.operation.0.net2.1.weight",
+      "encoder.pre_blocks_list.0.operation.0.net2.1.bias",
+      "encoder.pre_blocks_list.1.transfer.net.1.weight",
+      "encoder.pre_blocks_list.1.transfer.net.1.bias",
+      "encoder.pre_blocks_list.1.operation.0.net1.1.weight",
+      "encoder.pre_blocks_list.1.operation.0.net1.1.bias",
+      "encoder.pre_blocks_list.1.operation.0.net2.1.weight",
+      "encoder.pre_blocks_list.1.operation.0.net2.1.bias",
+      "encoder.pre_blocks_list.2.transfer.net.1.weight",
+      "encoder.pre_blocks_list.2.transfer.net.1.bias",
+      "encoder.pre_blocks_list.2.operation.0.net1.1.weight",
+      "encoder.pre_blocks_list.2.operation.0.net1.1.bias",
+      "encoder.pre_blocks_list.2.operation.0.net2.1.weight",
+      "encoder.pre_blocks_list.2.operation.0.net2.1.bias",
+      "encoder.pre_blocks_list.3.transfer.net.1.weight",
+      "encoder.pre_blocks_list.3.transfer.net.1.bias",
+      "encoder.pre_blocks_list.3.operation.0.net1.1.weight",
+      "encoder.pre_blocks_list.3.operation.0.net1.1.bias",
+      "encoder.pre_blocks_list.3.operation.0.net2.1.weight",
+      "encoder.pre_blocks_list.3.operation.0.net2.1.bias",
+      "encoder.mamba_blocks_list.0.0.mixer.D",
+      "encoder.mamba_blocks_list.0.0.mixer.D_b",
+      "encoder.mamba_blocks_list.0.0.mixer.conv1d.bias",
+      "encoder.mamba_blocks_list.0.0.mixer.dt_proj.bias",
+      "encoder.mamba_blocks_list.0.0.mixer.conv1d_b.bias",
+      "encoder.mamba_blocks_list.0.0.mixer.dt_proj_b.bias",
+      "encoder.mamba_blocks_list.0.0.norm.weight",
+      "encoder.mamba_blocks_list.1.0.mixer.D",
+      "encoder.mamba_blocks_list.1.0.mixer.D_b",
+      "encoder.mamba_blocks_list.1.0.mixer.conv1d.bias",
+      "encoder.mamba_blocks_list.1.0.mixer.dt_proj.bias",
+      "encoder.mamba_blocks_list.1.0.mixer.conv1d_b.bias",
+      "encoder.mamba_blocks_list.1.0.mixer.dt_proj_b.bias",
+      "encoder.mamba_blocks_list.1.0.norm.weight",
+      "encoder.mamba_blocks_list.1.1.mixer.D",
+      "encoder.mamba_blocks_list.1.1.mixer.D_b",
+      "encoder.mamba_blocks_list.1.1.mixer.conv1d.bias",
+      "encoder.mamba_blocks_list.1.1.mixer.dt_proj.bias",
+      "encoder.mamba_blocks_list.1.1.mixer.conv1d_b.bias",
+      "encoder.mamba_blocks_list.1.1.mixer.dt_proj_b.bias",
+      "encoder.mamba_blocks_list.1.1.norm.weight",
+      "encoder.mamba_blocks_list.2.0.mixer.D",
+      "encoder.mamba_blocks_list.2.0.mixer.D_b",
+      "encoder.mamba_blocks_list.2.0.mixer.conv1d.bias",
+      "encoder.mamba_blocks_list.2.0.mixer.dt_proj.bias",
+      "encoder.mamba_blocks_list.2.0.mixer.conv1d_b.bias",
+      "encoder.mamba_blocks_list.2.0.mixer.dt_proj_b.bias",
+      "encoder.mamba_blocks_list.2.0.norm.weight",
+      "encoder.mamba_blocks_list.2.1.mixer.D",
+      "encoder.mamba_blocks_list.2.1.mixer.D_b",
+      "encoder.mamba_blocks_list.2.1.mixer.conv1d.bias",
+      "encoder.mamba_blocks_list.2.1.mixer.dt_proj.bias",
+      "encoder.mamba_blocks_list.2.1.mixer.conv1d_b.bias",
+      "encoder.mamba_blocks_list.2.1.mixer.dt_proj_b.bias",
+      "encoder.mamba_blocks_list.2.1.norm.weight",
+      "encoder.mamba_blocks_list.3.0.mixer.D",
+      "encoder.mamba_blocks_list.3.0.mixer.D_b",
+      "encoder.mamba_blocks_list.3.0.mixer.conv1d.bias",
+      "encoder.mamba_blocks_list.3.0.mixer.dt_proj.bias",
+      "encoder.mamba_blocks_list.3.0.mixer.conv1d_b.bias",
+      "encoder.mamba_blocks_list.3.0.mixer.dt_proj_b.bias",
+      "encoder.mamba_blocks_list.3.0.norm.weight",
+      "encoder.mamba_blocks_list.3.1.mixer.D",
+      "encoder.mamba_blocks_list.3.1.mixer.D_b",
+      "encoder.mamba_blocks_list.3.1.mixer.conv1d.bias",
+      "encoder.mamba_blocks_list.3.1.mixer.dt_proj.bias",
+      "encoder.mamba_blocks_list.3.1.mixer.conv1d_b.bias",
+      "encoder.mamba_blocks_list.3.1.mixer.dt_proj_b.bias",
+      "encoder.mamba_blocks_list.3.1.norm.weight",
+      "encoder.mamba_blocks_list.3.2.mixer.D",
+      "encoder.mamba_blocks_list.3.2.mixer.D_b",
+      "encoder.mamba_blocks_list.3.2.mixer.conv1d.bias",
+      "encoder.mamba_blocks_list.3.2.mixer.dt_proj.bias",
+      "encoder.mamba_blocks_list.3.2.mixer.conv1d_b.bias",
+      "encoder.mamba_blocks_list.3.2.mixer.dt_proj_b.bias",
+      "encoder.mamba_blocks_list.3.2.norm.weight",
+      "encoder.mamba_blocks_list.3.3.mixer.D",
+      "encoder.mamba_blocks_list.3.3.mixer.D_b",
+      "encoder.mamba_blocks_list.3.3.mixer.conv1d.bias",
+      "encoder.mamba_blocks_list.3.3.mixer.dt_proj.bias",
+      "encoder.mamba_blocks_list.3.3.mixer.conv1d_b.bias",
+      "encoder.mamba_blocks_list.3.3.mixer.dt_proj_b.bias",
+      "encoder.mamba_blocks_list.3.3.norm.weight",
+      "decoder.decode_list.0.fuse.net.0.bias",
+      "decoder.decode_list.0.fuse.net.1.weight",
+      "decoder.decode_list.0.fuse.net.1.bias",
+      "decoder.decode_list.0.extraction.operation.0.net1.0.bias",
+      "decoder.decode_list.0.extraction.operation.0.net1.1.weight",
+      "decoder.decode_list.0.extraction.operation.0.net1.1.bias",
+      "decoder.decode_list.0.extraction.operation.0.net2.0.bias",
+      "decoder.decode_list.0.extraction.operation.0.net2.1.weight",
+      "decoder.decode_list.0.extraction.operation.0.net2.1.bias",
+      "decoder.decode_list.1.fuse.net.0.bias",
+      "decoder.decode_list.1.fuse.net.1.weight",
+      "decoder.decode_list.1.fuse.net.1.bias",
+      "decoder.decode_list.1.extraction.operation.0.net1.0.bias",
+      "decoder.decode_list.1.extraction.operation.0.net1.1.weight",
+      "decoder.decode_list.1.extraction.operation.0.net1.1.bias",
+      "decoder.decode_list.1.extraction.operation.0.net2.0.bias",
+      "decoder.decode_list.1.extraction.operation.0.net2.1.weight",
+      "decoder.decode_list.1.extraction.operation.0.net2.1.bias",
+      "decoder.decode_list.2.fuse.net.0.bias",
+      "decoder.decode_list.2.fuse.net.1.weight",
+      "decoder.decode_list.2.fuse.net.1.bias",
+      "decoder.decode_list.2.extraction.operation.0.net1.0.bias",
+      "decoder.decode_list.2.extraction.operation.0.net1.1.weight",
+      "decoder.decode_list.2.extraction.operation.0.net1.1.bias",
+      "decoder.decode_list.2.extraction.operation.0.net2.0.bias",
+      "decoder.decode_list.2.extraction.operation.0.net2.1.weight",
+      "decoder.decode_list.2.extraction.operation.0.net2.1.bias",
+      "decoder.decode_list.3.fuse.net.0.bias",
+      "decoder.decode_list.3.fuse.net.1.weight",
+      "decoder.decode_list.3.fuse.net.1.bias",
+      "decoder.decode_list.3.extraction.operation.0.net1.0.bias",
+      "decoder.decode_list.3.extraction.operation.0.net1.1.weight",
+      "decoder.decode_list.3.extraction.operation.0.net1.1.bias",
+      "decoder.decode_list.3.extraction.operation.0.net2.0.bias",
+      "decoder.decode_list.3.extraction.operation.0.net2.1.weight",
+      "decoder.decode_list.3.extraction.operation.0.net2.1.bias",
+      "decoder.gmp_map_list.0.net.1.weight",
+      "decoder.gmp_map_list.0.net.1.bias",
+      "decoder.gmp_map_list.1.net.1.weight",
+      "decoder.gmp_map_list.1.net.1.bias",
+      "decoder.gmp_map_list.2.net.1.weight",
+      "decoder.gmp_map_list.2.net.1.bias",
+      "decoder.gmp_map_list.3.net.1.weight",
+      "decoder.gmp_map_list.3.net.1.bias",
+      "decoder.gmp_map_list.4.net.1.weight",
+      "decoder.gmp_map_list.4.net.1.bias",
+      "decoder.gmp_map_end.net.1.weight",
+      "decoder.gmp_map_end.net.1.bias",
+      "head.head.0.1.weight",
+      "head.head.0.1.bias",
+      "head.head.2.0.bias"
+    ],
+    "lr_scale": 1.0
+  }
+}
+[10/14 01:32:55] PSNet5Sphere INFO: length of validation dataset: 2000
+[10/14 01:32:55] PSNet5Sphere INFO: number of classes of the dataset: 5
+[10/14 01:32:55] PSNet5Sphere INFO: Training from scratch
+[10/14 01:32:56] PSNet5Sphere INFO: length of training dataset: 2000
+[10/14 01:39:51] PSNet5Sphere INFO: Validation coverage Area_1: 86817/90308 (96.13%)
+[10/14 01:39:51] PSNet5Sphere INFO: Validation raw coverage Area_1: 6687732/6983990 (95.76%)
+[10/14 01:39:51] PSNet5Sphere INFO: Validation coverage Area_2: 187471/205544 (91.21%)
+[10/14 01:39:51] PSNet5Sphere INFO: Validation raw coverage Area_2: 6312520/6982782 (90.40%)
+[10/14 01:39:51] PSNet5Sphere INFO: Validation coverage Area_4: 54874/58436 (93.90%)
+[10/14 01:39:51] PSNet5Sphere INFO: Validation raw coverage Area_4: 4184344/4431180 (94.43%)
+[10/14 01:39:51] PSNet5Sphere WARNING: Validation metrics exclude raw points whose subsampled representatives received no votes; see the per-area coverage values above.
+[10/14 01:39:51] PSNet5Sphere INFO: Reference PSNet5 full-raw mIoU 12.01; raw points without votes inherit zero logits and predict class 0.
+[10/14 01:39:51] PSNet5Sphere INFO: Find a better ckpt @E1, val_miou 12.63 val_macc 23.30, val_oa 53.03
+mious: [ 5.19 55.61  0.1   2.07  0.2 ]
+[10/14 01:39:51] PSNet5Sphere INFO: Epoch 1 LR 0.000021 train_miou 10.25, val_miou 12.63, best val miou 12.63
+[10/14 01:39:51] PSNet5Sphere INFO: Found the best model and saved in log/psnet5/psnet5-train-PCM-ce-weighted-ngpus1-20261014-013255-RYxnShfJR67zVkme9fdFat/checkpoint/psnet5-train-PCM-ce-weighted-ngpus1-20261014-013255-RYxnShfJR67zVkme9fdFat_ckpt_best.pth
+[10/14 01:47:32] PSNet5Sphere INFO: Validation coverage Area_1: 86817/90308 (96.13%)
+[10/14 01:47:32] PSNet5Sphere INFO: Validation raw coverage Area_1: 6687732/6983990 (95.76%)
+[10/14 01:47:32] PSNet5Sphere INFO: Validation coverage Area_2: 187471/205544 (91.21%)
+[10/14 01:47:32] PSNet5Sphere INFO: Validation raw coverage Area_2: 6312520/6982782 (90.40%)
+[10/14 01:47:32] PSNet5Sphere INFO: Validation coverage Area_4: 54874/58436 (93.90%)
+[10/14 01:47:32] PSNet5Sphere INFO: Validation raw coverage Area_4: 4184344/4431180 (94.43%)
+[10/14 01:47:32] PSNet5Sphere WARNING: Validation metrics exclude raw points whose subsampled representatives received no votes; see the per-area coverage values above.
+[10/14 01:47:32] PSNet5Sphere INFO: Reference PSNet5 full-raw mIoU 18.17; raw points without votes inherit zero logits and predict class 0.
+[10/14 01:47:32] PSNet5Sphere INFO: Find a better ckpt @E2, val_miou 21.83 val_macc 32.84, val_oa 58.97
+mious: [25.39 56.62  0.   27.16  0.  ]
+[10/14 01:47:32] PSNet5Sphere INFO: Epoch 2 LR 0.000041 train_miou 14.59, val_miou 21.83, best val miou 21.83
+[10/14 01:47:32] PSNet5Sphere INFO: Found the best model and saved in log/psnet5/psnet5-train-PCM-ce-weighted-ngpus1-20261014-013255-RYxnShfJR67zVkme9fdFat/checkpoint/psnet5-train-PCM-ce-weighted-ngpus1-20261014-013255-RYxnShfJR67zVkme9fdFat_ckpt_best.pth
+[10/14 01:55:11] PSNet5Sphere INFO: Validation coverage Area_1: 86817/90308 (96.13%)
+[10/14 01:55:11] PSNet5Sphere INFO: Validation raw coverage Area_1: 6687732/6983990 (95.76%)
+[10/14 01:55:11] PSNet5Sphere INFO: Validation coverage Area_2: 187471/205544 (91.21%)
+[10/14 01:55:11] PSNet5Sphere INFO: Validation raw coverage Area_2: 6312520/6982782 (90.40%)
+[10/14 01:55:11] PSNet5Sphere INFO: Validation coverage Area_4: 54874/58436 (93.90%)
+[10/14 01:55:11] PSNet5Sphere INFO: Validation raw coverage Area_4: 4184344/4431180 (94.43%)
+[10/14 01:55:11] PSNet5Sphere WARNING: Validation metrics exclude raw points whose subsampled representatives received no votes; see the per-area coverage values above.
+[10/14 01:55:11] PSNet5Sphere INFO: Reference PSNet5 full-raw mIoU 20.94; raw points without votes inherit zero logits and predict class 0.
+[10/14 01:55:11] PSNet5Sphere INFO: Find a better ckpt @E3, val_miou 22.76 val_macc 41.35, val_oa 59.56
+mious: [14.   55.6   0.81 40.92  2.47]
+[10/14 01:55:11] PSNet5Sphere INFO: Epoch 3 LR 0.000060 train_miou 19.12, val_miou 22.76, best val miou 22.76
+[10/14 01:55:11] PSNet5Sphere INFO: Found the best model and saved in log/psnet5/psnet5-train-PCM-ce-weighted-ngpus1-20261014-013255-RYxnShfJR67zVkme9fdFat/checkpoint/psnet5-train-PCM-ce-weighted-ngpus1-20261014-013255-RYxnShfJR67zVkme9fdFat_ckpt_best.pth
+[10/14 02:02:50] PSNet5Sphere INFO: Validation coverage Area_1: 86817/90308 (96.13%)
+[10/14 02:02:50] PSNet5Sphere INFO: Validation raw coverage Area_1: 6687732/6983990 (95.76%)
+[10/14 02:02:50] PSNet5Sphere INFO: Validation coverage Area_2: 187471/205544 (91.21%)
+[10/14 02:02:50] PSNet5Sphere INFO: Validation raw coverage Area_2: 6312520/6982782 (90.40%)
+[10/14 02:02:50] PSNet5Sphere INFO: Validation coverage Area_4: 54874/58436 (93.90%)
+[10/14 02:02:50] PSNet5Sphere INFO: Validation raw coverage Area_4: 4184344/4431180 (94.43%)
+[10/14 02:02:50] PSNet5Sphere WARNING: Validation metrics exclude raw points whose subsampled representatives received no votes; see the per-area coverage values above.
+[10/14 02:02:50] PSNet5Sphere INFO: Reference PSNet5 full-raw mIoU 20.09; raw points without votes inherit zero logits and predict class 0.
+[10/14 02:02:50] PSNet5Sphere INFO: Epoch 4 LR 0.000080 train_miou 25.85, val_miou 21.25, best val miou 22.76
+[10/14 02:10:29] PSNet5Sphere INFO: Validation coverage Area_1: 86817/90308 (96.13%)
+[10/14 02:10:29] PSNet5Sphere INFO: Validation raw coverage Area_1: 6687732/6983990 (95.76%)
+[10/14 02:10:29] PSNet5Sphere INFO: Validation coverage Area_2: 187471/205544 (91.21%)
+[10/14 02:10:29] PSNet5Sphere INFO: Validation raw coverage Area_2: 6312520/6982782 (90.40%)
+[10/14 02:10:29] PSNet5Sphere INFO: Validation coverage Area_4: 54874/58436 (93.90%)
+[10/14 02:10:29] PSNet5Sphere INFO: Validation raw coverage Area_4: 4184344/4431180 (94.43%)
+[10/14 02:10:29] PSNet5Sphere WARNING: Validation metrics exclude raw points whose subsampled representatives received no votes; see the per-area coverage values above.
+[10/14 02:10:29] PSNet5Sphere INFO: Reference PSNet5 full-raw mIoU 35.08; raw points without votes inherit zero logits and predict class 0.
+[10/14 02:10:29] PSNet5Sphere INFO: Find a better ckpt @E5, val_miou 38.28 val_macc 59.07, val_oa 72.88
+mious: [14.1  74.31  3.57 68.98 30.44]
+[10/14 02:10:29] PSNet5Sphere INFO: Epoch 5 LR 0.000097 train_miou 32.84, val_miou 38.28, best val miou 38.28
+[10/14 02:10:29] PSNet5Sphere INFO: Found the best model and saved in log/psnet5/psnet5-train-PCM-ce-weighted-ngpus1-20261014-013255-RYxnShfJR67zVkme9fdFat/checkpoint/psnet5-train-PCM-ce-weighted-ngpus1-20261014-013255-RYxnShfJR67zVkme9fdFat_ckpt_best.pth
+[10/14 02:18:04] PSNet5Sphere INFO: Validation coverage Area_1: 86817/90308 (96.13%)
+[10/14 02:18:04] PSNet5Sphere INFO: Validation raw coverage Area_1: 6687732/6983990 (95.76%)
+[10/14 02:18:04] PSNet5Sphere INFO: Validation coverage Area_2: 187471/205544 (91.21%)
+[10/14 02:18:04] PSNet5Sphere INFO: Validation raw coverage Area_2: 6312520/6982782 (90.40%)
+[10/14 02:18:04] PSNet5Sphere INFO: Validation coverage Area_4: 54874/58436 (93.90%)
+[10/14 02:18:04] PSNet5Sphere INFO: Validation raw coverage Area_4: 4184344/4431180 (94.43%)
+[10/14 02:18:04] PSNet5Sphere WARNING: Validation metrics exclude raw points whose subsampled representatives received no votes; see the per-area coverage values above.
+[10/14 02:18:04] PSNet5Sphere INFO: Reference PSNet5 full-raw mIoU 40.21; raw points without votes inherit zero logits and predict class 0.
+[10/14 02:18:04] PSNet5Sphere INFO: Find a better ckpt @E6, val_miou 43.35 val_macc 69.47, val_oa 68.64
+mious: [12.23 65.43 33.97 70.44 34.7 ]
+[10/14 02:18:04] PSNet5Sphere INFO: Epoch 6 LR 0.000095 train_miou 39.29, val_miou 43.35, best val miou 43.35
+[10/14 02:18:05] PSNet5Sphere INFO: Found the best model and saved in log/psnet5/psnet5-train-PCM-ce-weighted-ngpus1-20261014-013255-RYxnShfJR67zVkme9fdFat/checkpoint/psnet5-train-PCM-ce-weighted-ngpus1-20261014-013255-RYxnShfJR67zVkme9fdFat_ckpt_best.pth
+[10/14 02:25:42] PSNet5Sphere INFO: Validation coverage Area_1: 86817/90308 (96.13%)
+[10/14 02:25:42] PSNet5Sphere INFO: Validation raw coverage Area_1: 6687732/6983990 (95.76%)
+[10/14 02:25:42] PSNet5Sphere INFO: Validation coverage Area_2: 187471/205544 (91.21%)
+[10/14 02:25:42] PSNet5Sphere INFO: Validation raw coverage Area_2: 6312520/6982782 (90.40%)
+[10/14 02:25:42] PSNet5Sphere INFO: Validation coverage Area_4: 54874/58436 (93.90%)
+[10/14 02:25:42] PSNet5Sphere INFO: Validation raw coverage Area_4: 4184344/4431180 (94.43%)
+[10/14 02:25:42] PSNet5Sphere WARNING: Validation metrics exclude raw points whose subsampled representatives received no votes; see the per-area coverage values above.
+[10/14 02:25:42] PSNet5Sphere INFO: Reference PSNet5 full-raw mIoU 38.67; raw points without votes inherit zero logits and predict class 0.
+[10/14 02:25:42] PSNet5Sphere INFO: Find a better ckpt @E7, val_miou 43.94 val_macc 63.69, val_oa 78.56
+mious: [30.22 78.64  5.21 72.5  33.13]
+[10/14 02:25:42] PSNet5Sphere INFO: Epoch 7 LR 0.000093 train_miou 43.24, val_miou 43.94, best val miou 43.94
+[10/14 02:25:42] PSNet5Sphere INFO: Found the best model and saved in log/psnet5/psnet5-train-PCM-ce-weighted-ngpus1-20261014-013255-RYxnShfJR67zVkme9fdFat/checkpoint/psnet5-train-PCM-ce-weighted-ngpus1-20261014-013255-RYxnShfJR67zVkme9fdFat_ckpt_best.pth
+[10/14 02:33:19] PSNet5Sphere INFO: Validation coverage Area_1: 86817/90308 (96.13%)
+[10/14 02:33:19] PSNet5Sphere INFO: Validation raw coverage Area_1: 6687732/6983990 (95.76%)
+[10/14 02:33:19] PSNet5Sphere INFO: Validation coverage Area_2: 187471/205544 (91.21%)
+[10/14 02:33:19] PSNet5Sphere INFO: Validation raw coverage Area_2: 6312520/6982782 (90.40%)
+[10/14 02:33:19] PSNet5Sphere INFO: Validation coverage Area_4: 54874/58436 (93.90%)
+[10/14 02:33:19] PSNet5Sphere INFO: Validation raw coverage Area_4: 4184344/4431180 (94.43%)
+[10/14 02:33:19] PSNet5Sphere WARNING: Validation metrics exclude raw points whose subsampled representatives received no votes; see the per-area coverage values above.
+[10/14 02:33:19] PSNet5Sphere INFO: Reference PSNet5 full-raw mIoU 41.00; raw points without votes inherit zero logits and predict class 0.
+[10/14 02:33:19] PSNet5Sphere INFO: Find a better ckpt @E8, val_miou 44.74 val_macc 67.64, val_oa 75.62
+mious: [15.62 75.73 16.5  76.5  39.36]
+[10/14 02:33:19] PSNet5Sphere INFO: Epoch 8 LR 0.000091 train_miou 47.40, val_miou 44.74, best val miou 44.74
+[10/14 02:33:19] PSNet5Sphere INFO: Found the best model and saved in log/psnet5/psnet5-train-PCM-ce-weighted-ngpus1-20261014-013255-RYxnShfJR67zVkme9fdFat/checkpoint/psnet5-train-PCM-ce-weighted-ngpus1-20261014-013255-RYxnShfJR67zVkme9fdFat_ckpt_best.pth
+[10/14 02:40:58] PSNet5Sphere INFO: Validation coverage Area_1: 86817/90308 (96.13%)
+[10/14 02:40:58] PSNet5Sphere INFO: Validation raw coverage Area_1: 6687732/6983990 (95.76%)
+[10/14 02:40:58] PSNet5Sphere INFO: Validation coverage Area_2: 187471/205544 (91.21%)
+[10/14 02:40:58] PSNet5Sphere INFO: Validation raw coverage Area_2: 6312520/6982782 (90.40%)
+[10/14 02:40:58] PSNet5Sphere INFO: Validation coverage Area_4: 54874/58436 (93.90%)
+[10/14 02:40:58] PSNet5Sphere INFO: Validation raw coverage Area_4: 4184344/4431180 (94.43%)
+[10/14 02:40:58] PSNet5Sphere WARNING: Validation metrics exclude raw points whose subsampled representatives received no votes; see the per-area coverage values above.
+[10/14 02:40:58] PSNet5Sphere INFO: Reference PSNet5 full-raw mIoU 44.50; raw points without votes inherit zero logits and predict class 0.
+[10/14 02:40:58] PSNet5Sphere INFO: Find a better ckpt @E9, val_miou 49.48 val_macc 79.19, val_oa 75.79
+mious: [27.   72.09 31.91 78.86 37.55]
+[10/14 02:40:58] PSNet5Sphere INFO: Epoch 9 LR 0.000089 train_miou 49.71, val_miou 49.48, best val miou 49.48
+[10/14 02:40:58] PSNet5Sphere INFO: Found the best model and saved in log/psnet5/psnet5-train-PCM-ce-weighted-ngpus1-20261014-013255-RYxnShfJR67zVkme9fdFat/checkpoint/psnet5-train-PCM-ce-weighted-ngpus1-20261014-013255-RYxnShfJR67zVkme9fdFat_ckpt_best.pth
+[10/14 02:48:37] PSNet5Sphere INFO: Validation coverage Area_1: 86817/90308 (96.13%)
+[10/14 02:48:37] PSNet5Sphere INFO: Validation raw coverage Area_1: 6687732/6983990 (95.76%)
+[10/14 02:48:37] PSNet5Sphere INFO: Validation coverage Area_2: 187471/205544 (91.21%)
+[10/14 02:48:37] PSNet5Sphere INFO: Validation raw coverage Area_2: 6312520/6982782 (90.40%)
+[10/14 02:48:37] PSNet5Sphere INFO: Validation coverage Area_4: 54874/58436 (93.90%)
+[10/14 02:48:37] PSNet5Sphere INFO: Validation raw coverage Area_4: 4184344/4431180 (94.43%)
+[10/14 02:48:37] PSNet5Sphere WARNING: Validation metrics exclude raw points whose subsampled representatives received no votes; see the per-area coverage values above.
+[10/14 02:48:37] PSNet5Sphere INFO: Reference PSNet5 full-raw mIoU 49.02; raw points without votes inherit zero logits and predict class 0.
+[10/14 02:48:37] PSNet5Sphere INFO: Find a better ckpt @E10, val_miou 54.86 val_macc 76.73, val_oa 85.04
+mious: [27.83 86.87 38.07 86.37 35.15]
+[10/14 02:48:37] PSNet5Sphere INFO: Epoch 10 LR 0.000087 train_miou 55.58, val_miou 54.86, best val miou 54.86
+[10/14 02:48:37] PSNet5Sphere INFO: Found the best model and saved in log/psnet5/psnet5-train-PCM-ce-weighted-ngpus1-20261014-013255-RYxnShfJR67zVkme9fdFat/checkpoint/psnet5-train-PCM-ce-weighted-ngpus1-20261014-013255-RYxnShfJR67zVkme9fdFat_ckpt_best.pth
+[10/14 02:56:17] PSNet5Sphere INFO: Validation coverage Area_1: 86817/90308 (96.13%)
+[10/14 02:56:17] PSNet5Sphere INFO: Validation raw coverage Area_1: 6687732/6983990 (95.76%)
+[10/14 02:56:17] PSNet5Sphere INFO: Validation coverage Area_2: 187471/205544 (91.21%)
+[10/14 02:56:17] PSNet5Sphere INFO: Validation raw coverage Area_2: 6312520/6982782 (90.40%)
+[10/14 02:56:17] PSNet5Sphere INFO: Validation coverage Area_4: 54874/58436 (93.90%)
+[10/14 02:56:17] PSNet5Sphere INFO: Validation raw coverage Area_4: 4184344/4431180 (94.43%)
+[10/14 02:56:17] PSNet5Sphere WARNING: Validation metrics exclude raw points whose subsampled representatives received no votes; see the per-area coverage values above.
+[10/14 02:56:17] PSNet5Sphere INFO: Reference PSNet5 full-raw mIoU 47.51; raw points without votes inherit zero logits and predict class 0.
+[10/14 02:56:17] PSNet5Sphere INFO: Epoch 11 LR 0.000084 train_miou 59.29, val_miou 52.31, best val miou 54.86
+[10/14 03:03:55] PSNet5Sphere INFO: Validation coverage Area_1: 86817/90308 (96.13%)
+[10/14 03:03:55] PSNet5Sphere INFO: Validation raw coverage Area_1: 6687732/6983990 (95.76%)
+[10/14 03:03:55] PSNet5Sphere INFO: Validation coverage Area_2: 187471/205544 (91.21%)
+[10/14 03:03:55] PSNet5Sphere INFO: Validation raw coverage Area_2: 6312520/6982782 (90.40%)
+[10/14 03:03:55] PSNet5Sphere INFO: Validation coverage Area_4: 54874/58436 (93.90%)
+[10/14 03:03:55] PSNet5Sphere INFO: Validation raw coverage Area_4: 4184344/4431180 (94.43%)
+[10/14 03:03:55] PSNet5Sphere WARNING: Validation metrics exclude raw points whose subsampled representatives received no votes; see the per-area coverage values above.
+[10/14 03:03:55] PSNet5Sphere INFO: Reference PSNet5 full-raw mIoU 44.50; raw points without votes inherit zero logits and predict class 0.
+[10/14 03:03:55] PSNet5Sphere INFO: Epoch 12 LR 0.000081 train_miou 64.03, val_miou 51.66, best val miou 54.86
+[10/14 03:11:34] PSNet5Sphere INFO: Validation coverage Area_1: 86817/90308 (96.13%)
+[10/14 03:11:34] PSNet5Sphere INFO: Validation raw coverage Area_1: 6687732/6983990 (95.76%)
+[10/14 03:11:34] PSNet5Sphere INFO: Validation coverage Area_2: 187471/205544 (91.21%)
+[10/14 03:11:34] PSNet5Sphere INFO: Validation raw coverage Area_2: 6312520/6982782 (90.40%)
+[10/14 03:11:34] PSNet5Sphere INFO: Validation coverage Area_4: 54874/58436 (93.90%)
+[10/14 03:11:34] PSNet5Sphere INFO: Validation raw coverage Area_4: 4184344/4431180 (94.43%)
+[10/14 03:11:34] PSNet5Sphere WARNING: Validation metrics exclude raw points whose subsampled representatives received no votes; see the per-area coverage values above.
+[10/14 03:11:34] PSNet5Sphere INFO: Reference PSNet5 full-raw mIoU 47.98; raw points without votes inherit zero logits and predict class 0.
+[10/14 03:11:34] PSNet5Sphere INFO: Epoch 13 LR 0.000079 train_miou 68.01, val_miou 54.64, best val miou 54.86
+[10/14 03:19:17] PSNet5Sphere INFO: Validation coverage Area_1: 86817/90308 (96.13%)
+[10/14 03:19:17] PSNet5Sphere INFO: Validation raw coverage Area_1: 6687732/6983990 (95.76%)
+[10/14 03:19:17] PSNet5Sphere INFO: Validation coverage Area_2: 187471/205544 (91.21%)
+[10/14 03:19:17] PSNet5Sphere INFO: Validation raw coverage Area_2: 6312520/6982782 (90.40%)
+[10/14 03:19:17] PSNet5Sphere INFO: Validation coverage Area_4: 54874/58436 (93.90%)
+[10/14 03:19:17] PSNet5Sphere INFO: Validation raw coverage Area_4: 4184344/4431180 (94.43%)
+[10/14 03:19:17] PSNet5Sphere WARNING: Validation metrics exclude raw points whose subsampled representatives received no votes; see the per-area coverage values above.
+[10/14 03:19:17] PSNet5Sphere INFO: Reference PSNet5 full-raw mIoU 55.53; raw points without votes inherit zero logits and predict class 0.
+[10/14 03:19:17] PSNet5Sphere INFO: Find a better ckpt @E14, val_miou 64.21 val_macc 84.79, val_oa 87.92
+mious: [39.37 86.52 37.79 88.93 68.43]
+[10/14 03:19:17] PSNet5Sphere INFO: Epoch 14 LR 0.000075 train_miou 71.57, val_miou 64.21, best val miou 64.21
+[10/14 03:19:17] PSNet5Sphere INFO: Found the best model and saved in log/psnet5/psnet5-train-PCM-ce-weighted-ngpus1-20261014-013255-RYxnShfJR67zVkme9fdFat/checkpoint/psnet5-train-PCM-ce-weighted-ngpus1-20261014-013255-RYxnShfJR67zVkme9fdFat_ckpt_best.pth
+[10/14 03:26:55] PSNet5Sphere INFO: Validation coverage Area_1: 86817/90308 (96.13%)
+[10/14 03:26:55] PSNet5Sphere INFO: Validation raw coverage Area_1: 6687732/6983990 (95.76%)
+[10/14 03:26:55] PSNet5Sphere INFO: Validation coverage Area_2: 187471/205544 (91.21%)
+[10/14 03:26:55] PSNet5Sphere INFO: Validation raw coverage Area_2: 6312520/6982782 (90.40%)
+[10/14 03:26:55] PSNet5Sphere INFO: Validation coverage Area_4: 54874/58436 (93.90%)
+[10/14 03:26:55] PSNet5Sphere INFO: Validation raw coverage Area_4: 4184344/4431180 (94.43%)
+[10/14 03:26:55] PSNet5Sphere WARNING: Validation metrics exclude raw points whose subsampled representatives received no votes; see the per-area coverage values above.
+[10/14 03:26:55] PSNet5Sphere INFO: Reference PSNet5 full-raw mIoU 57.42; raw points without votes inherit zero logits and predict class 0.
+[10/14 03:26:55] PSNet5Sphere INFO: Find a better ckpt @E15, val_miou 64.23 val_macc 85.02, val_oa 87.77
+mious: [29.85 88.46 59.67 82.73 60.43]
+[10/14 03:26:55] PSNet5Sphere INFO: Epoch 15 LR 0.000072 train_miou 75.25, val_miou 64.23, best val miou 64.23
+[10/14 03:26:56] PSNet5Sphere INFO: Found the best model and saved in log/psnet5/psnet5-train-PCM-ce-weighted-ngpus1-20261014-013255-RYxnShfJR67zVkme9fdFat/checkpoint/psnet5-train-PCM-ce-weighted-ngpus1-20261014-013255-RYxnShfJR67zVkme9fdFat_ckpt_best.pth
+[10/14 03:34:34] PSNet5Sphere INFO: Validation coverage Area_1: 86817/90308 (96.13%)
+[10/14 03:34:34] PSNet5Sphere INFO: Validation raw coverage Area_1: 6687732/6983990 (95.76%)
+[10/14 03:34:34] PSNet5Sphere INFO: Validation coverage Area_2: 187471/205544 (91.21%)
+[10/14 03:34:34] PSNet5Sphere INFO: Validation raw coverage Area_2: 6312520/6982782 (90.40%)
+[10/14 03:34:34] PSNet5Sphere INFO: Validation coverage Area_4: 54874/58436 (93.90%)
+[10/14 03:34:34] PSNet5Sphere INFO: Validation raw coverage Area_4: 4184344/4431180 (94.43%)
+[10/14 03:34:34] PSNet5Sphere WARNING: Validation metrics exclude raw points whose subsampled representatives received no votes; see the per-area coverage values above.
+[10/14 03:34:34] PSNet5Sphere INFO: Reference PSNet5 full-raw mIoU 52.38; raw points without votes inherit zero logits and predict class 0.
+[10/14 03:34:34] PSNet5Sphere INFO: Epoch 16 LR 0.000069 train_miou 77.77, val_miou 60.94, best val miou 64.23
+[10/14 03:42:18] PSNet5Sphere INFO: Validation coverage Area_1: 86817/90308 (96.13%)
+[10/14 03:42:18] PSNet5Sphere INFO: Validation raw coverage Area_1: 6687732/6983990 (95.76%)
+[10/14 03:42:18] PSNet5Sphere INFO: Validation coverage Area_2: 187471/205544 (91.21%)
+[10/14 03:42:18] PSNet5Sphere INFO: Validation raw coverage Area_2: 6312520/6982782 (90.40%)
+[10/14 03:42:18] PSNet5Sphere INFO: Validation coverage Area_4: 54874/58436 (93.90%)
+[10/14 03:42:18] PSNet5Sphere INFO: Validation raw coverage Area_4: 4184344/4431180 (94.43%)
+[10/14 03:42:18] PSNet5Sphere WARNING: Validation metrics exclude raw points whose subsampled representatives received no votes; see the per-area coverage values above.
+[10/14 03:42:18] PSNet5Sphere INFO: Reference PSNet5 full-raw mIoU 55.41; raw points without votes inherit zero logits and predict class 0.
+[10/14 03:42:18] PSNet5Sphere INFO: Epoch 17 LR 0.000066 train_miou 79.75, val_miou 63.83, best val miou 64.23
+[10/14 03:50:35] PSNet5Sphere INFO: Validation coverage Area_1: 86817/90308 (96.13%)
+[10/14 03:50:35] PSNet5Sphere INFO: Validation raw coverage Area_1: 6687732/6983990 (95.76%)
+[10/14 03:50:35] PSNet5Sphere INFO: Validation coverage Area_2: 187471/205544 (91.21%)
+[10/14 03:50:35] PSNet5Sphere INFO: Validation raw coverage Area_2: 6312520/6982782 (90.40%)
+[10/14 03:50:35] PSNet5Sphere INFO: Validation coverage Area_4: 54874/58436 (93.90%)
+[10/14 03:50:35] PSNet5Sphere INFO: Validation raw coverage Area_4: 4184344/4431180 (94.43%)
+[10/14 03:50:35] PSNet5Sphere WARNING: Validation metrics exclude raw points whose subsampled representatives received no votes; see the per-area coverage values above.
+[10/14 03:50:35] PSNet5Sphere INFO: Reference PSNet5 full-raw mIoU 59.00; raw points without votes inherit zero logits and predict class 0.
+[10/14 03:50:35] PSNet5Sphere INFO: Find a better ckpt @E18, val_miou 72.68 val_macc 86.95, val_oa 89.99
+mious: [74.53 92.93 65.31 78.16 52.44]
+[10/14 03:50:35] PSNet5Sphere INFO: Epoch 18 LR 0.000062 train_miou 81.61, val_miou 72.68, best val miou 72.68
+[10/14 03:50:35] PSNet5Sphere INFO: Found the best model and saved in log/psnet5/psnet5-train-PCM-ce-weighted-ngpus1-20261014-013255-RYxnShfJR67zVkme9fdFat/checkpoint/psnet5-train-PCM-ce-weighted-ngpus1-20261014-013255-RYxnShfJR67zVkme9fdFat_ckpt_best.pth
+[10/14 03:58:12] PSNet5Sphere INFO: Validation coverage Area_1: 86817/90308 (96.13%)
+[10/14 03:58:12] PSNet5Sphere INFO: Validation raw coverage Area_1: 6687732/6983990 (95.76%)
+[10/14 03:58:12] PSNet5Sphere INFO: Validation coverage Area_2: 187471/205544 (91.21%)
+[10/14 03:58:12] PSNet5Sphere INFO: Validation raw coverage Area_2: 6312520/6982782 (90.40%)
+[10/14 03:58:12] PSNet5Sphere INFO: Validation coverage Area_4: 54874/58436 (93.90%)
+[10/14 03:58:12] PSNet5Sphere INFO: Validation raw coverage Area_4: 4184344/4431180 (94.43%)
+[10/14 03:58:12] PSNet5Sphere WARNING: Validation metrics exclude raw points whose subsampled representatives received no votes; see the per-area coverage values above.
+[10/14 03:58:12] PSNet5Sphere INFO: Reference PSNet5 full-raw mIoU 47.37; raw points without votes inherit zero logits and predict class 0.
+[10/14 03:58:12] PSNet5Sphere INFO: Epoch 19 LR 0.000059 train_miou 83.90, val_miou 56.93, best val miou 72.68
+[10/14 04:05:49] PSNet5Sphere INFO: Validation coverage Area_1: 86817/90308 (96.13%)
+[10/14 04:05:50] PSNet5Sphere INFO: Validation raw coverage Area_1: 6687732/6983990 (95.76%)
+[10/14 04:05:50] PSNet5Sphere INFO: Validation coverage Area_2: 187471/205544 (91.21%)
+[10/14 04:05:50] PSNet5Sphere INFO: Validation raw coverage Area_2: 6312520/6982782 (90.40%)
+[10/14 04:05:50] PSNet5Sphere INFO: Validation coverage Area_4: 54874/58436 (93.90%)
+[10/14 04:05:50] PSNet5Sphere INFO: Validation raw coverage Area_4: 4184344/4431180 (94.43%)
+[10/14 04:05:50] PSNet5Sphere WARNING: Validation metrics exclude raw points whose subsampled representatives received no votes; see the per-area coverage values above.
+[10/14 04:05:50] PSNet5Sphere INFO: Reference PSNet5 full-raw mIoU 64.07; raw points without votes inherit zero logits and predict class 0.
+[10/14 04:05:50] PSNet5Sphere INFO: Find a better ckpt @E20, val_miou 74.84 val_macc 87.83, val_oa 93.07
+mious: [50.16 93.72 72.32 87.45 70.53]
+[10/14 04:05:50] PSNet5Sphere INFO: Epoch 20 LR 0.000055 train_miou 84.31, val_miou 74.84, best val miou 74.84
+[10/14 04:05:50] PSNet5Sphere INFO: Found the best model and saved in log/psnet5/psnet5-train-PCM-ce-weighted-ngpus1-20261014-013255-RYxnShfJR67zVkme9fdFat/checkpoint/psnet5-train-PCM-ce-weighted-ngpus1-20261014-013255-RYxnShfJR67zVkme9fdFat_ckpt_best.pth
+[10/14 04:13:27] PSNet5Sphere INFO: Validation coverage Area_1: 86817/90308 (96.13%)
+[10/14 04:13:27] PSNet5Sphere INFO: Validation raw coverage Area_1: 6687732/6983990 (95.76%)
+[10/14 04:13:27] PSNet5Sphere INFO: Validation coverage Area_2: 187471/205544 (91.21%)
+[10/14 04:13:27] PSNet5Sphere INFO: Validation raw coverage Area_2: 6312520/6982782 (90.40%)
+[10/14 04:13:28] PSNet5Sphere INFO: Validation coverage Area_4: 54874/58436 (93.90%)
+[10/14 04:13:28] PSNet5Sphere INFO: Validation raw coverage Area_4: 4184344/4431180 (94.43%)
+[10/14 04:13:28] PSNet5Sphere WARNING: Validation metrics exclude raw points whose subsampled representatives received no votes; see the per-area coverage values above.
+[10/14 04:13:28] PSNet5Sphere INFO: Reference PSNet5 full-raw mIoU 62.69; raw points without votes inherit zero logits and predict class 0.
+[10/14 04:13:28] PSNet5Sphere INFO: Find a better ckpt @E21, val_miou 76.15 val_macc 91.20, val_oa 92.92
+mious: [69.67 94.8  61.17 83.56 71.57]
+[10/14 04:13:28] PSNet5Sphere INFO: Epoch 21 LR 0.000051 train_miou 85.97, val_miou 76.15, best val miou 76.15
+[10/14 04:13:28] PSNet5Sphere INFO: Found the best model and saved in log/psnet5/psnet5-train-PCM-ce-weighted-ngpus1-20261014-013255-RYxnShfJR67zVkme9fdFat/checkpoint/psnet5-train-PCM-ce-weighted-ngpus1-20261014-013255-RYxnShfJR67zVkme9fdFat_ckpt_best.pth
+[10/14 04:21:05] PSNet5Sphere INFO: Validation coverage Area_1: 86817/90308 (96.13%)
+[10/14 04:21:05] PSNet5Sphere INFO: Validation raw coverage Area_1: 6687732/6983990 (95.76%)
+[10/14 04:21:05] PSNet5Sphere INFO: Validation coverage Area_2: 187471/205544 (91.21%)
+[10/14 04:21:05] PSNet5Sphere INFO: Validation raw coverage Area_2: 6312520/6982782 (90.40%)
+[10/14 04:21:05] PSNet5Sphere INFO: Validation coverage Area_4: 54874/58436 (93.90%)
+[10/14 04:21:05] PSNet5Sphere INFO: Validation raw coverage Area_4: 4184344/4431180 (94.43%)
+[10/14 04:21:05] PSNet5Sphere WARNING: Validation metrics exclude raw points whose subsampled representatives received no votes; see the per-area coverage values above.
+[10/14 04:21:05] PSNet5Sphere INFO: Reference PSNet5 full-raw mIoU 49.73; raw points without votes inherit zero logits and predict class 0.
+[10/14 04:21:05] PSNet5Sphere INFO: Epoch 22 LR 0.000048 train_miou 88.22, val_miou 61.22, best val miou 76.15
+[10/14 04:28:44] PSNet5Sphere INFO: Validation coverage Area_1: 86817/90308 (96.13%)
+[10/14 04:28:44] PSNet5Sphere INFO: Validation raw coverage Area_1: 6687732/6983990 (95.76%)
+[10/14 04:28:44] PSNet5Sphere INFO: Validation coverage Area_2: 187471/205544 (91.21%)
+[10/14 04:28:44] PSNet5Sphere INFO: Validation raw coverage Area_2: 6312520/6982782 (90.40%)
+[10/14 04:28:44] PSNet5Sphere INFO: Validation coverage Area_4: 54874/58436 (93.90%)
+[10/14 04:28:44] PSNet5Sphere INFO: Validation raw coverage Area_4: 4184344/4431180 (94.43%)
+[10/14 04:28:44] PSNet5Sphere WARNING: Validation metrics exclude raw points whose subsampled representatives received no votes; see the per-area coverage values above.
+[10/14 04:28:44] PSNet5Sphere INFO: Reference PSNet5 full-raw mIoU 63.86; raw points without votes inherit zero logits and predict class 0.
+[10/14 04:28:44] PSNet5Sphere INFO: Find a better ckpt @E23, val_miou 77.54 val_macc 90.60, val_oa 93.43
+mious: [70.36 96.04 68.94 82.7  69.67]
+[10/14 04:28:44] PSNet5Sphere INFO: Epoch 23 LR 0.000044 train_miou 89.46, val_miou 77.54, best val miou 77.54
+[10/14 04:28:45] PSNet5Sphere INFO: Found the best model and saved in log/psnet5/psnet5-train-PCM-ce-weighted-ngpus1-20261014-013255-RYxnShfJR67zVkme9fdFat/checkpoint/psnet5-train-PCM-ce-weighted-ngpus1-20261014-013255-RYxnShfJR67zVkme9fdFat_ckpt_best.pth
+[10/14 04:36:21] PSNet5Sphere INFO: Validation coverage Area_1: 86817/90308 (96.13%)
+[10/14 04:36:21] PSNet5Sphere INFO: Validation raw coverage Area_1: 6687732/6983990 (95.76%)
+[10/14 04:36:21] PSNet5Sphere INFO: Validation coverage Area_2: 187471/205544 (91.21%)
+[10/14 04:36:21] PSNet5Sphere INFO: Validation raw coverage Area_2: 6312520/6982782 (90.40%)
+[10/14 04:36:21] PSNet5Sphere INFO: Validation coverage Area_4: 54874/58436 (93.90%)
+[10/14 04:36:21] PSNet5Sphere INFO: Validation raw coverage Area_4: 4184344/4431180 (94.43%)
+[10/14 04:36:21] PSNet5Sphere WARNING: Validation metrics exclude raw points whose subsampled representatives received no votes; see the per-area coverage values above.
+[10/14 04:36:21] PSNet5Sphere INFO: Reference PSNet5 full-raw mIoU 59.42; raw points without votes inherit zero logits and predict class 0.
+[10/14 04:36:21] PSNet5Sphere INFO: Epoch 24 LR 0.000041 train_miou 87.90, val_miou 70.04, best val miou 77.54
+[10/14 04:44:00] PSNet5Sphere INFO: Validation coverage Area_1: 86817/90308 (96.13%)
+[10/14 04:44:00] PSNet5Sphere INFO: Validation raw coverage Area_1: 6687732/6983990 (95.76%)
+[10/14 04:44:00] PSNet5Sphere INFO: Validation coverage Area_2: 187471/205544 (91.21%)
+[10/14 04:44:00] PSNet5Sphere INFO: Validation raw coverage Area_2: 6312520/6982782 (90.40%)
+[10/14 04:44:00] PSNet5Sphere INFO: Validation coverage Area_4: 54874/58436 (93.90%)
+[10/14 04:44:00] PSNet5Sphere INFO: Validation raw coverage Area_4: 4184344/4431180 (94.43%)
+[10/14 04:44:00] PSNet5Sphere WARNING: Validation metrics exclude raw points whose subsampled representatives received no votes; see the per-area coverage values above.
+[10/14 04:44:00] PSNet5Sphere INFO: Reference PSNet5 full-raw mIoU 61.84; raw points without votes inherit zero logits and predict class 0.
+[10/14 04:44:00] PSNet5Sphere INFO: Epoch 25 LR 0.000038 train_miou 89.44, val_miou 73.69, best val miou 77.54
+[10/14 04:51:37] PSNet5Sphere INFO: Validation coverage Area_1: 86817/90308 (96.13%)
+[10/14 04:51:38] PSNet5Sphere INFO: Validation raw coverage Area_1: 6687732/6983990 (95.76%)
+[10/14 04:51:38] PSNet5Sphere INFO: Validation coverage Area_2: 187471/205544 (91.21%)
+[10/14 04:51:38] PSNet5Sphere INFO: Validation raw coverage Area_2: 6312520/6982782 (90.40%)
+[10/14 04:51:38] PSNet5Sphere INFO: Validation coverage Area_4: 54874/58436 (93.90%)
+[10/14 04:51:38] PSNet5Sphere INFO: Validation raw coverage Area_4: 4184344/4431180 (94.43%)
+[10/14 04:51:38] PSNet5Sphere WARNING: Validation metrics exclude raw points whose subsampled representatives received no votes; see the per-area coverage values above.
+[10/14 04:51:38] PSNet5Sphere INFO: Reference PSNet5 full-raw mIoU 65.30; raw points without votes inherit zero logits and predict class 0.
+[10/14 04:51:38] PSNet5Sphere INFO: Epoch 26 LR 0.000035 train_miou 89.88, val_miou 75.98, best val miou 77.54
+[10/14 04:59:15] PSNet5Sphere INFO: Validation coverage Area_1: 86817/90308 (96.13%)
+[10/14 04:59:15] PSNet5Sphere INFO: Validation raw coverage Area_1: 6687732/6983990 (95.76%)
+[10/14 04:59:15] PSNet5Sphere INFO: Validation coverage Area_2: 187471/205544 (91.21%)
+[10/14 04:59:15] PSNet5Sphere INFO: Validation raw coverage Area_2: 6312520/6982782 (90.40%)
+[10/14 04:59:15] PSNet5Sphere INFO: Validation coverage Area_4: 54874/58436 (93.90%)
+[10/14 04:59:15] PSNet5Sphere INFO: Validation raw coverage Area_4: 4184344/4431180 (94.43%)
+[10/14 04:59:15] PSNet5Sphere WARNING: Validation metrics exclude raw points whose subsampled representatives received no votes; see the per-area coverage values above.
+[10/14 04:59:15] PSNet5Sphere INFO: Reference PSNet5 full-raw mIoU 66.03; raw points without votes inherit zero logits and predict class 0.
+[10/14 04:59:15] PSNet5Sphere INFO: Find a better ckpt @E27, val_miou 79.69 val_macc 92.58, val_oa 94.58
+mious: [67.53 94.05 65.3  93.75 77.85]
+[10/14 04:59:15] PSNet5Sphere INFO: Epoch 27 LR 0.000031 train_miou 91.25, val_miou 79.69, best val miou 79.69
+[10/14 04:59:16] PSNet5Sphere INFO: Found the best model and saved in log/psnet5/psnet5-train-PCM-ce-weighted-ngpus1-20261014-013255-RYxnShfJR67zVkme9fdFat/checkpoint/psnet5-train-PCM-ce-weighted-ngpus1-20261014-013255-RYxnShfJR67zVkme9fdFat_ckpt_best.pth
+[10/14 05:06:52] PSNet5Sphere INFO: Validation coverage Area_1: 86817/90308 (96.13%)
+[10/14 05:06:52] PSNet5Sphere INFO: Validation raw coverage Area_1: 6687732/6983990 (95.76%)
+[10/14 05:06:52] PSNet5Sphere INFO: Validation coverage Area_2: 187471/205544 (91.21%)
+[10/14 05:06:52] PSNet5Sphere INFO: Validation raw coverage Area_2: 6312520/6982782 (90.40%)
+[10/14 05:06:52] PSNet5Sphere INFO: Validation coverage Area_4: 54874/58436 (93.90%)
+[10/14 05:06:52] PSNet5Sphere INFO: Validation raw coverage Area_4: 4184344/4431180 (94.43%)
+[10/14 05:06:52] PSNet5Sphere WARNING: Validation metrics exclude raw points whose subsampled representatives received no votes; see the per-area coverage values above.
+[10/14 05:06:52] PSNet5Sphere INFO: Reference PSNet5 full-raw mIoU 67.10; raw points without votes inherit zero logits and predict class 0.
+[10/14 05:06:52] PSNet5Sphere INFO: Epoch 28 LR 0.000029 train_miou 91.16, val_miou 78.94, best val miou 79.69
+[10/14 05:14:29] PSNet5Sphere INFO: Validation coverage Area_1: 86817/90308 (96.13%)
+[10/14 05:14:29] PSNet5Sphere INFO: Validation raw coverage Area_1: 6687732/6983990 (95.76%)
+[10/14 05:14:29] PSNet5Sphere INFO: Validation coverage Area_2: 187471/205544 (91.21%)
+[10/14 05:14:29] PSNet5Sphere INFO: Validation raw coverage Area_2: 6312520/6982782 (90.40%)
+[10/14 05:14:29] PSNet5Sphere INFO: Validation coverage Area_4: 54874/58436 (93.90%)
+[10/14 05:14:29] PSNet5Sphere INFO: Validation raw coverage Area_4: 4184344/4431180 (94.43%)
+[10/14 05:14:29] PSNet5Sphere WARNING: Validation metrics exclude raw points whose subsampled representatives received no votes; see the per-area coverage values above.
+[10/14 05:14:29] PSNet5Sphere INFO: Reference PSNet5 full-raw mIoU 67.39; raw points without votes inherit zero logits and predict class 0.
+[10/14 05:14:29] PSNet5Sphere INFO: Epoch 29 LR 0.000026 train_miou 92.91, val_miou 79.01, best val miou 79.69
+[10/14 05:22:07] PSNet5Sphere INFO: Validation coverage Area_1: 86817/90308 (96.13%)
+[10/14 05:22:07] PSNet5Sphere INFO: Validation raw coverage Area_1: 6687732/6983990 (95.76%)
+[10/14 05:22:07] PSNet5Sphere INFO: Validation coverage Area_2: 187471/205544 (91.21%)
+[10/14 05:22:07] PSNet5Sphere INFO: Validation raw coverage Area_2: 6312520/6982782 (90.40%)
+[10/14 05:22:07] PSNet5Sphere INFO: Validation coverage Area_4: 54874/58436 (93.90%)
+[10/14 05:22:07] PSNet5Sphere INFO: Validation raw coverage Area_4: 4184344/4431180 (94.43%)
+[10/14 05:22:07] PSNet5Sphere WARNING: Validation metrics exclude raw points whose subsampled representatives received no votes; see the per-area coverage values above.
+[10/14 05:22:07] PSNet5Sphere INFO: Reference PSNet5 full-raw mIoU 67.48; raw points without votes inherit zero logits and predict class 0.
+[10/14 05:22:07] PSNet5Sphere INFO: Find a better ckpt @E30, val_miou 81.32 val_macc 92.15, val_oa 95.23
+mious: [67.11 96.31 73.21 89.38 80.62]
+[10/14 05:22:07] PSNet5Sphere INFO: Epoch 30 LR 0.000023 train_miou 93.68, val_miou 81.32, best val miou 81.32
+[10/14 05:22:08] PSNet5Sphere INFO: Found the best model and saved in log/psnet5/psnet5-train-PCM-ce-weighted-ngpus1-20261014-013255-RYxnShfJR67zVkme9fdFat/checkpoint/psnet5-train-PCM-ce-weighted-ngpus1-20261014-013255-RYxnShfJR67zVkme9fdFat_ckpt_best.pth
+[10/14 05:29:45] PSNet5Sphere INFO: Validation coverage Area_1: 86817/90308 (96.13%)
+[10/14 05:29:45] PSNet5Sphere INFO: Validation raw coverage Area_1: 6687732/6983990 (95.76%)
+[10/14 05:29:45] PSNet5Sphere INFO: Validation coverage Area_2: 187471/205544 (91.21%)
+[10/14 05:29:45] PSNet5Sphere INFO: Validation raw coverage Area_2: 6312520/6982782 (90.40%)
+[10/14 05:29:45] PSNet5Sphere INFO: Validation coverage Area_4: 54874/58436 (93.90%)
+[10/14 05:29:45] PSNet5Sphere INFO: Validation raw coverage Area_4: 4184344/4431180 (94.43%)
+[10/14 05:29:45] PSNet5Sphere WARNING: Validation metrics exclude raw points whose subsampled representatives received no votes; see the per-area coverage values above.
+[10/14 05:29:45] PSNet5Sphere INFO: Reference PSNet5 full-raw mIoU 65.51; raw points without votes inherit zero logits and predict class 0.
+[10/14 05:29:45] PSNet5Sphere INFO: Epoch 31 LR 0.000021 train_miou 93.68, val_miou 77.58, best val miou 81.32
+[10/14 05:37:25] PSNet5Sphere INFO: Validation coverage Area_1: 86817/90308 (96.13%)
+[10/14 05:37:25] PSNet5Sphere INFO: Validation raw coverage Area_1: 6687732/6983990 (95.76%)
+[10/14 05:37:25] PSNet5Sphere INFO: Validation coverage Area_2: 187471/205544 (91.21%)
+[10/14 05:37:25] PSNet5Sphere INFO: Validation raw coverage Area_2: 6312520/6982782 (90.40%)
+[10/14 05:37:25] PSNet5Sphere INFO: Validation coverage Area_4: 54874/58436 (93.90%)
+[10/14 05:37:25] PSNet5Sphere INFO: Validation raw coverage Area_4: 4184344/4431180 (94.43%)
+[10/14 05:37:25] PSNet5Sphere WARNING: Validation metrics exclude raw points whose subsampled representatives received no votes; see the per-area coverage values above.
+[10/14 05:37:25] PSNet5Sphere INFO: Reference PSNet5 full-raw mIoU 56.35; raw points without votes inherit zero logits and predict class 0.
+[10/14 05:37:25] PSNet5Sphere INFO: Epoch 32 LR 0.000019 train_miou 93.21, val_miou 69.44, best val miou 81.32
+[10/14 05:45:04] PSNet5Sphere INFO: Validation coverage Area_1: 86817/90308 (96.13%)
+[10/14 05:45:04] PSNet5Sphere INFO: Validation raw coverage Area_1: 6687732/6983990 (95.76%)
+[10/14 05:45:04] PSNet5Sphere INFO: Validation coverage Area_2: 187471/205544 (91.21%)
+[10/14 05:45:04] PSNet5Sphere INFO: Validation raw coverage Area_2: 6312520/6982782 (90.40%)
+[10/14 05:45:04] PSNet5Sphere INFO: Validation coverage Area_4: 54874/58436 (93.90%)
+[10/14 05:45:05] PSNet5Sphere INFO: Validation raw coverage Area_4: 4184344/4431180 (94.43%)
+[10/14 05:45:05] PSNet5Sphere WARNING: Validation metrics exclude raw points whose subsampled representatives received no votes; see the per-area coverage values above.
+[10/14 05:45:05] PSNet5Sphere INFO: Reference PSNet5 full-raw mIoU 68.34; raw points without votes inherit zero logits and predict class 0.
+[10/14 05:45:05] PSNet5Sphere INFO: Find a better ckpt @E33, val_miou 82.56 val_macc 93.18, val_oa 95.83
+mious: [67.03 96.05 68.26 92.52 88.94]
+[10/14 05:45:05] PSNet5Sphere INFO: Epoch 33 LR 0.000017 train_miou 94.43, val_miou 82.56, best val miou 82.56
+[10/14 05:45:05] PSNet5Sphere INFO: Found the best model and saved in log/psnet5/psnet5-train-PCM-ce-weighted-ngpus1-20261014-013255-RYxnShfJR67zVkme9fdFat/checkpoint/psnet5-train-PCM-ce-weighted-ngpus1-20261014-013255-RYxnShfJR67zVkme9fdFat_ckpt_best.pth
+[10/14 05:52:43] PSNet5Sphere INFO: Validation coverage Area_1: 86817/90308 (96.13%)
+[10/14 05:52:43] PSNet5Sphere INFO: Validation raw coverage Area_1: 6687732/6983990 (95.76%)
+[10/14 05:52:43] PSNet5Sphere INFO: Validation coverage Area_2: 187471/205544 (91.21%)
+[10/14 05:52:43] PSNet5Sphere INFO: Validation raw coverage Area_2: 6312520/6982782 (90.40%)
+[10/14 05:52:43] PSNet5Sphere INFO: Validation coverage Area_4: 54874/58436 (93.90%)
+[10/14 05:52:43] PSNet5Sphere INFO: Validation raw coverage Area_4: 4184344/4431180 (94.43%)
+[10/14 05:52:43] PSNet5Sphere WARNING: Validation metrics exclude raw points whose subsampled representatives received no votes; see the per-area coverage values above.
+[10/14 05:52:43] PSNet5Sphere INFO: Reference PSNet5 full-raw mIoU 69.54; raw points without votes inherit zero logits and predict class 0.
+[10/14 05:52:43] PSNet5Sphere INFO: Find a better ckpt @E34, val_miou 83.65 val_macc 93.13, val_oa 96.30
+mious: [65.06 96.99 73.12 92.03 91.06]
+[10/14 05:52:43] PSNet5Sphere INFO: Epoch 34 LR 0.000015 train_miou 94.50, val_miou 83.65, best val miou 83.65
+[10/14 05:52:43] PSNet5Sphere INFO: Found the best model and saved in log/psnet5/psnet5-train-PCM-ce-weighted-ngpus1-20261014-013255-RYxnShfJR67zVkme9fdFat/checkpoint/psnet5-train-PCM-ce-weighted-ngpus1-20261014-013255-RYxnShfJR67zVkme9fdFat_ckpt_best.pth
+[10/14 06:00:20] PSNet5Sphere INFO: Validation coverage Area_1: 86817/90308 (96.13%)
+[10/14 06:00:20] PSNet5Sphere INFO: Validation raw coverage Area_1: 6687732/6983990 (95.76%)
+[10/14 06:00:20] PSNet5Sphere INFO: Validation coverage Area_2: 187471/205544 (91.21%)
+[10/14 06:00:20] PSNet5Sphere INFO: Validation raw coverage Area_2: 6312520/6982782 (90.40%)
+[10/14 06:00:20] PSNet5Sphere INFO: Validation coverage Area_4: 54874/58436 (93.90%)
+[10/14 06:00:20] PSNet5Sphere INFO: Validation raw coverage Area_4: 4184344/4431180 (94.43%)
+[10/14 06:00:20] PSNet5Sphere WARNING: Validation metrics exclude raw points whose subsampled representatives received no votes; see the per-area coverage values above.
+[10/14 06:00:20] PSNet5Sphere INFO: Reference PSNet5 full-raw mIoU 67.77; raw points without votes inherit zero logits and predict class 0.
+[10/14 06:00:20] PSNet5Sphere INFO: Epoch 35 LR 0.000013 train_miou 94.73, val_miou 82.23, best val miou 83.65
+[10/14 06:07:57] PSNet5Sphere INFO: Validation coverage Area_1: 86817/90308 (96.13%)
+[10/14 06:07:57] PSNet5Sphere INFO: Validation raw coverage Area_1: 6687732/6983990 (95.76%)
+[10/14 06:07:57] PSNet5Sphere INFO: Validation coverage Area_2: 187471/205544 (91.21%)
+[10/14 06:07:57] PSNet5Sphere INFO: Validation raw coverage Area_2: 6312520/6982782 (90.40%)
+[10/14 06:07:57] PSNet5Sphere INFO: Validation coverage Area_4: 54874/58436 (93.90%)
+[10/14 06:07:57] PSNet5Sphere INFO: Validation raw coverage Area_4: 4184344/4431180 (94.43%)
+[10/14 06:07:57] PSNet5Sphere WARNING: Validation metrics exclude raw points whose subsampled representatives received no votes; see the per-area coverage values above.
+[10/14 06:07:57] PSNet5Sphere INFO: Reference PSNet5 full-raw mIoU 70.19; raw points without votes inherit zero logits and predict class 0.
+[10/14 06:07:57] PSNet5Sphere INFO: Find a better ckpt @E36, val_miou 84.46 val_macc 93.51, val_oa 96.60
+mious: [64.82 96.93 72.84 93.48 94.19]
+[10/14 06:07:57] PSNet5Sphere INFO: Epoch 36 LR 0.000012 train_miou 95.11, val_miou 84.46, best val miou 84.46
+[10/14 06:07:58] PSNet5Sphere INFO: Found the best model and saved in log/psnet5/psnet5-train-PCM-ce-weighted-ngpus1-20261014-013255-RYxnShfJR67zVkme9fdFat/checkpoint/psnet5-train-PCM-ce-weighted-ngpus1-20261014-013255-RYxnShfJR67zVkme9fdFat_ckpt_best.pth
+[10/14 06:15:35] PSNet5Sphere INFO: Validation coverage Area_1: 86817/90308 (96.13%)
+[10/14 06:15:35] PSNet5Sphere INFO: Validation raw coverage Area_1: 6687732/6983990 (95.76%)
+[10/14 06:15:35] PSNet5Sphere INFO: Validation coverage Area_2: 187471/205544 (91.21%)
+[10/14 06:15:35] PSNet5Sphere INFO: Validation raw coverage Area_2: 6312520/6982782 (90.40%)
+[10/14 06:15:35] PSNet5Sphere INFO: Validation coverage Area_4: 54874/58436 (93.90%)
+[10/14 06:15:35] PSNet5Sphere INFO: Validation raw coverage Area_4: 4184344/4431180 (94.43%)
+[10/14 06:15:35] PSNet5Sphere WARNING: Validation metrics exclude raw points whose subsampled representatives received no votes; see the per-area coverage values above.
+[10/14 06:15:35] PSNet5Sphere INFO: Reference PSNet5 full-raw mIoU 69.79; raw points without votes inherit zero logits and predict class 0.
+[10/14 06:15:35] PSNet5Sphere INFO: Epoch 37 LR 0.000011 train_miou 95.68, val_miou 84.05, best val miou 84.46
+[10/14 06:23:12] PSNet5Sphere INFO: Validation coverage Area_1: 86817/90308 (96.13%)
+[10/14 06:23:12] PSNet5Sphere INFO: Validation raw coverage Area_1: 6687732/6983990 (95.76%)
+[10/14 06:23:12] PSNet5Sphere INFO: Validation coverage Area_2: 187471/205544 (91.21%)
+[10/14 06:23:12] PSNet5Sphere INFO: Validation raw coverage Area_2: 6312520/6982782 (90.40%)
+[10/14 06:23:12] PSNet5Sphere INFO: Validation coverage Area_4: 54874/58436 (93.90%)
+[10/14 06:23:12] PSNet5Sphere INFO: Validation raw coverage Area_4: 4184344/4431180 (94.43%)
+[10/14 06:23:12] PSNet5Sphere WARNING: Validation metrics exclude raw points whose subsampled representatives received no votes; see the per-area coverage values above.
+[10/14 06:23:12] PSNet5Sphere INFO: Reference PSNet5 full-raw mIoU 69.40; raw points without votes inherit zero logits and predict class 0.
+[10/14 06:23:12] PSNet5Sphere INFO: Find a better ckpt @E38, val_miou 85.24 val_macc 93.41, val_oa 96.47
+mious: [76.13 96.95 72.74 92.93 87.44]
+[10/14 06:23:12] PSNet5Sphere INFO: Epoch 38 LR 0.000011 train_miou 95.29, val_miou 85.24, best val miou 85.24
+[10/14 06:23:12] PSNet5Sphere INFO: Found the best model and saved in log/psnet5/psnet5-train-PCM-ce-weighted-ngpus1-20261014-013255-RYxnShfJR67zVkme9fdFat/checkpoint/psnet5-train-PCM-ce-weighted-ngpus1-20261014-013255-RYxnShfJR67zVkme9fdFat_ckpt_best.pth
+[10/14 06:30:50] PSNet5Sphere INFO: Validation coverage Area_1: 86817/90308 (96.13%)
+[10/14 06:30:50] PSNet5Sphere INFO: Validation raw coverage Area_1: 6687732/6983990 (95.76%)
+[10/14 06:30:50] PSNet5Sphere INFO: Validation coverage Area_2: 187471/205544 (91.21%)
+[10/14 06:30:50] PSNet5Sphere INFO: Validation raw coverage Area_2: 6312520/6982782 (90.40%)
+[10/14 06:30:50] PSNet5Sphere INFO: Validation coverage Area_4: 54874/58436 (93.90%)
+[10/14 06:30:50] PSNet5Sphere INFO: Validation raw coverage Area_4: 4184344/4431180 (94.43%)
+[10/14 06:30:50] PSNet5Sphere WARNING: Validation metrics exclude raw points whose subsampled representatives received no votes; see the per-area coverage values above.
+[10/14 06:30:50] PSNet5Sphere INFO: Reference PSNet5 full-raw mIoU 70.48; raw points without votes inherit zero logits and predict class 0.
+[10/14 06:30:50] PSNet5Sphere INFO: Find a better ckpt @E39, val_miou 86.08 val_macc 93.72, val_oa 96.94
+mious: [72.85 96.88 72.93 95.22 92.53]
+[10/14 06:30:50] PSNet5Sphere INFO: Epoch 39 LR 0.000010 train_miou 95.54, val_miou 86.08, best val miou 86.08
+[10/14 06:30:50] PSNet5Sphere INFO: Found the best model and saved in log/psnet5/psnet5-train-PCM-ce-weighted-ngpus1-20261014-013255-RYxnShfJR67zVkme9fdFat/checkpoint/psnet5-train-PCM-ce-weighted-ngpus1-20261014-013255-RYxnShfJR67zVkme9fdFat_ckpt_best.pth
+[10/14 06:38:26] PSNet5Sphere INFO: Validation coverage Area_1: 86817/90308 (96.13%)
+[10/14 06:38:26] PSNet5Sphere INFO: Validation raw coverage Area_1: 6687732/6983990 (95.76%)
+[10/14 06:38:26] PSNet5Sphere INFO: Validation coverage Area_2: 187471/205544 (91.21%)
+[10/14 06:38:26] PSNet5Sphere INFO: Validation raw coverage Area_2: 6312520/6982782 (90.40%)
+[10/14 06:38:26] PSNet5Sphere INFO: Validation coverage Area_4: 54874/58436 (93.90%)
+[10/14 06:38:26] PSNet5Sphere INFO: Validation raw coverage Area_4: 4184344/4431180 (94.43%)
+[10/14 06:38:26] PSNet5Sphere WARNING: Validation metrics exclude raw points whose subsampled representatives received no votes; see the per-area coverage values above.
+[10/14 06:38:26] PSNet5Sphere INFO: Reference PSNet5 full-raw mIoU 70.22; raw points without votes inherit zero logits and predict class 0.
+[10/14 06:38:26] PSNet5Sphere INFO: Epoch 40 LR 0.000010 train_miou 95.88, val_miou 84.88, best val miou 86.08
+[10/14 06:38:26] PSNet5Sphere INFO: Best ckpt @E39,  val_oa 96.94, val_macc 93.72, val_miou 86.08, 
+iou per cls is: [72.85 96.88 72.93 95.22 92.53]
+[10/14 06:38:26] PSNet5Sphere INFO: Successful Loading the ckpt from log/psnet5/psnet5-train-PCM-ce-weighted-ngpus1-20261014-013255-RYxnShfJR67zVkme9fdFat/checkpoint/psnet5-train-PCM-ce-weighted-ngpus1-20261014-013255-RYxnShfJR67zVkme9fdFat_ckpt_best.pth
+[10/14 06:38:26] PSNet5Sphere INFO: ckpts @ 39 epoch( {'best_val': 86.08106231689453} )
+[10/14 06:38:26] PSNet5Sphere INFO: Final sphere evaluation reuses the validation loader (protocol=development, split=val).
+[10/14 06:40:46] PSNet5Sphere INFO: Validation coverage Area_1: 86817/90308 (96.13%)
+[10/14 06:40:46] PSNet5Sphere INFO: Validation raw coverage Area_1: 6687732/6983990 (95.76%)
+[10/14 06:40:46] PSNet5Sphere INFO: Validation coverage Area_2: 187471/205544 (91.21%)
+[10/14 06:40:46] PSNet5Sphere INFO: Validation raw coverage Area_2: 6312520/6982782 (90.40%)
+[10/14 06:40:46] PSNet5Sphere INFO: Validation coverage Area_4: 54874/58436 (93.90%)
+[10/14 06:40:46] PSNet5Sphere INFO: Validation raw coverage Area_4: 4184344/4431180 (94.43%)
+[10/14 06:40:46] PSNet5Sphere WARNING: Validation metrics exclude raw points whose subsampled representatives received no votes; see the per-area coverage values above.
+[10/14 06:40:46] PSNet5Sphere INFO: Reference PSNet5 full-raw mIoU 70.48; raw points without votes inherit zero logits and predict class 0.
+[10/14 06:40:46] PSNet5Sphere INFO: Best ckpt @E39,  validation_oa 96.94, validation_macc 93.72, validation_miou 86.08, 
+iou per cls is: [72.85 96.88 72.93 95.22 92.53]
+[10/14 06:40:46] PSNet5Sphere INFO: save results in log/psnet5/psnet5-train-PCM-ce-weighted-ngpus1-20261014-013255-RYxnShfJR67zVkme9fdFat/psnet5-train-PCM-ce-weighted-ngpus1-20261014-013255-RYxnShfJR67zVkme9fdFat.csv
