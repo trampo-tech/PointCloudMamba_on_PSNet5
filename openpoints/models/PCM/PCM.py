@@ -62,7 +62,10 @@ class PointMambaEncoder(nn.Module):
 
         if use_order_prompt:
             # learnable embeddings for per order, channel is 384
-            unique_order = list(set(mamba_layers_orders))
+            # Prompt rows are stored in checkpoints, but this order-to-row
+            # mapping is not. Preserve config order so a checkpoint uses the
+            # same prompt for each serialization order in every process.
+            unique_order = list(dict.fromkeys(mamba_layers_orders))
             overall_prompt_nums = len(unique_order) * prompt_num_per_order
             self.order_prompt = nn.Embedding(overall_prompt_nums, 384)
             order2idx = {order: [i * prompt_num_per_order, (i + 1) * prompt_num_per_order]
@@ -449,7 +452,9 @@ class PointMambaPartDecoder(nn.Module):
         self.gmp_map_list = nn.ModuleList()
         for en_dim in en_dims:
             self.gmp_map_list.append(ConvBNReLU1D(en_dim, gmp_dim, bias=bias, activation=act_args))
-        self.gmp_map_end = ConvBNReLU1D(gmp_dim * len(en_dims), gmp_dim, bias=bias, activation=act_args)
+        self.gmp_map_end = ConvBNReLU1D(
+            gmp_dim * len(en_dims), gmp_dim, bias=bias, activation=act_args,
+            allow_singleton=True)
         self.out_channels = out_channel + gmp_dim + cls_dim
 
     def serialize_func(self, p, x, x_res, order, layers_outputs=[]):
@@ -562,7 +567,9 @@ class PointMambaDecoder(nn.Module):
         self.gmp_map_list = nn.ModuleList()
         for en_dim in en_dims:
             self.gmp_map_list.append(ConvBNReLU1D(en_dim, gmp_dim, bias=bias, activation=act_args))
-        self.gmp_map_end = ConvBNReLU1D(gmp_dim * len(en_dims), gmp_dim, bias=bias, activation=act_args)
+        self.gmp_map_end = ConvBNReLU1D(
+            gmp_dim * len(en_dims), gmp_dim, bias=bias, activation=act_args,
+            allow_singleton=True)
         self.out_channels = out_channel + gmp_dim
 
     def serialize_func(self, p, x, x_res, order, layers_outputs=[]):

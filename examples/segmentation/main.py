@@ -5,6 +5,7 @@ If more than 1 GPU is provided, will launch multi processing distributed trainin
 if you only wana use 1 GPU, set `CUDA_VISIBLE_DEVICES` accordingly
 """
 import __init__
+from contextlib import nullcontext
 import argparse, yaml, os, logging, numpy as np, csv, wandb, glob
 from tqdm import tqdm
 import torch, torch.nn as nn
@@ -15,6 +16,7 @@ from openpoints.utils import set_random_seed, save_checkpoint, load_checkpoint, 
     cal_model_parm_nums, Wandb, generate_exp_directory, resume_exp_directory, EasyConfig, dist_utils, find_free_port, load_checkpoint_inv
 from openpoints.utils import AverageMeter, ConfusionMatrix, get_mious
 from openpoints.dataset import build_dataloader_from_cfg, get_features_by_keys, get_class_weights
+from openpoints.dataset.psnet5.voting import add_sphere_votes, averaged_cloud_logits
 from openpoints.dataset.data_util import voxelize
 from openpoints.dataset.semantic_kitti.semantickitti import load_label_kitti, load_pc_kitti, remap_lut_read, remap_lut_write, get_semantickitti_file_list
 from openpoints.transforms import build_transforms_from_cfg
@@ -22,6 +24,7 @@ from openpoints.optim import build_optimizer_from_cfg
 from openpoints.scheduler import build_scheduler_from_cfg
 from openpoints.loss import build_criterion_from_cfg
 from openpoints.models import build_model_from_cfg
+from openpoints.models.layers.norm import batch_stats_for_eval
 import warnings
 
 warnings.simplefilter(action='ignore', category=FutureWarning)
@@ -127,6 +130,8 @@ def main(gpu, cfg):
     else:
         writer = None
     set_random_seed(cfg.seed + cfg.rank, deterministic=cfg.deterministic)
+    if cfg.get('cudnn_benchmark') is not None:
+        torch.backends.cudnn.benchmark = bool(cfg.cudnn_benchmark) and not cfg.deterministic
     torch.backends.cudnn.enabled = True
     logging.info(cfg)
 
@@ -237,7 +242,13 @@ def main(gpu, cfg):
         scaler = None
 
     val_miou, val_macc, val_oa, val_ious, val_accs = 0., 0., 0., [], []
-    best_val, macc_when_best, oa_when_best, ious_when_best, best_epoch = 0., 0., 0., [], 0
+    best_val = float(cfg.get('resume_best_val', 0.0))
+    best_epoch = int(cfg.get('resume_best_epoch', 0))
+    if cfg.mode == 'resume' and best_val > 0 and best_epoch == 0:
+        best_path = os.path.join(cfg.ckpt_dir, f'{cfg.run_name}_ckpt_best.pth')
+        if os.path.isfile(best_path):
+            best_epoch = int(torch.load(best_path, map_location='cpu')['epoch'])
+    macc_when_best, oa_when_best, ious_when_best = float('nan'), float('nan'), []
     total_iter = 0
     for epoch in range(cfg.start_epoch, cfg.epochs + 1):
         if cfg.distributed:
@@ -246,6 +257,15 @@ def main(gpu, cfg):
             train_loader.dataset.epoch = epoch - 1
         train_loss, train_miou, train_macc, train_oa, _, _, total_iter = \
             train_one_epoch(model, train_loader, criterion, optimizer, scheduler, scaler, epoch, total_iter, cfg)
+
+        if cfg.sched_on_epoch:
+            scheduler.step(epoch)
+        # Preserve the completed epoch even if validation later fails (for
+        # example because a configured coverage floor is not met).
+        if cfg.rank == 0:
+            save_checkpoint(cfg, model, epoch, optimizer, scheduler,
+                            additioanl_dict={'best_val': best_val, 'best_epoch': best_epoch},
+                            is_best=False)
 
         is_best = False
         if epoch % cfg.val_freq == 0:
@@ -277,11 +297,9 @@ def main(gpu, cfg):
             writer.add_scalar('train_macc', train_macc, epoch)
             writer.add_scalar('lr', lr, epoch)
 
-        if cfg.sched_on_epoch:
-            scheduler.step(epoch)
         if cfg.rank == 0:
             save_checkpoint(cfg, model, epoch, optimizer, scheduler,
-                            additioanl_dict={'best_val': best_val},
+                            additioanl_dict={'best_val': best_val, 'best_epoch': best_epoch},
                             is_best=is_best
                             )
             is_best = False
@@ -300,20 +318,27 @@ def main(gpu, cfg):
         # test
         load_checkpoint(model, pretrained_path=os.path.join(cfg.ckpt_dir, f'{cfg.run_name}_ckpt_best.pth'))
         cfg.csv_path = os.path.join(cfg.run_dir, cfg.run_name + f'.csv')
-        if 'sphere' in cfg.dataset.common.NAME.lower():
-            # TODO: 
+        sphere_validation = 'sphere' in cfg.dataset.common.NAME.lower()
+        if sphere_validation:
+            logging.info(
+                'Final sphere evaluation reuses the validation loader '
+                '(protocol=%s, split=%s).',
+                cfg.dataset.common.get('protocol', 'unspecified'),
+                val_loader.dataset.split)
             test_miou, test_macc, test_oa, test_ious, test_accs = validate_sphere(model, val_loader, cfg, epoch=epoch)
         else:
             data_list = generate_data_list(cfg)
             test_miou, test_macc, test_oa, test_ious, test_accs, _ = test(model, data_list, cfg)
+        final_split = 'validation' if sphere_validation else 'test'
         with np.printoptions(precision=2, suppress=True):
             logging.info(
-                f'Best ckpt @E{best_epoch},  test_oa {test_oa:.2f}, test_macc {test_macc:.2f}, test_miou {test_miou:.2f}, '
+                f'Best ckpt @E{best_epoch},  {final_split}_oa {test_oa:.2f}, '
+                f'{final_split}_macc {test_macc:.2f}, {final_split}_miou {test_miou:.2f}, '
                 f'\niou per cls is: {test_ious}')
         if writer is not None:
-            writer.add_scalar('test_miou', test_miou, epoch)
-            writer.add_scalar('test_macc', test_macc, epoch)
-            writer.add_scalar('test_oa', test_oa, epoch)
+            writer.add_scalar(f'{final_split}_miou', test_miou, epoch)
+            writer.add_scalar(f'{final_split}_macc', test_macc, epoch)
+            writer.add_scalar(f'{final_split}_oa', test_oa, epoch)
         write_to_csv(test_oa, test_macc, test_miou, test_ious, best_epoch, cfg, write_header=True)
         logging.info(f'save results in {cfg.csv_path}')
         if cfg.use_voting:
@@ -387,7 +412,11 @@ def train_one_epoch(model, train_loader, criterion, optimizer, scheduler, scaler
             # print(f"Memory after backward is {mem}")
             
         # update confusion matrix
-        cm.update(logits.argmax(dim=1), target)
+        if 'mask' in cfg.criterion_args.NAME.lower():
+            valid = data['mask'].bool()
+            cm.update(logits.argmax(dim=1)[valid], target[valid])
+        else:
+            cm.update(logits.argmax(dim=1), target)
         loss_meter.update(loss.item())
 
         if idx % cfg.print_freq:
@@ -451,71 +480,73 @@ def validate_sphere(model, val_loader, cfg, num_votes=1, data_transform=None, ep
     thus, one point can be evaluated multiple times.
     In this validate_mask, we will avg the logits.
     """
+    if cfg.distributed:
+        raise RuntimeError('Sphere validation is intentionally single-process until keyed distributed reduction is implemented')
     model.eval()  # set model to eval mode
     cm = ConfusionMatrix(num_classes=cfg.num_classes, ignore_index=cfg.ignore_index)
+    reference_cm = ConfusionMatrix(num_classes=cfg.num_classes, ignore_index=cfg.ignore_index)
     if cfg.get('visualize', False):
         from openpoints.dataset.vis3d import write_obj
         cfg.vis_dir = os.path.join(cfg.run_dir, 'visualization')
         os.makedirs(cfg.vis_dir, exist_ok=True)
         cfg.cmap = cfg.cmap.astype(np.float32) / 255.
 
-    pbar = tqdm(enumerate(val_loader), total=val_loader.__len__())
-    all_logits, idx_points = [], []
+    device = next(model.parameters()).device
+    logit_sums = [torch.zeros((len(points), cfg.num_classes), device=device, dtype=torch.float32)
+                  for points in val_loader.dataset.sub_clouds_points]
+    vote_counts = [torch.zeros(len(points), device=device, dtype=torch.float32)
+                   for points in val_loader.dataset.sub_clouds_points]
+    pbar = tqdm(enumerate(val_loader), total=val_loader.__len__(), desc='Val spheres')
     for idx, data in pbar:
         for key in data.keys():
             data[key] = data[key].cuda(non_blocking=True)
         data['x'] = get_features_by_keys(data, cfg.feature_keys)
         data['epoch'] = epoch
         data['iter'] = total_iter 
-        logits = model(data)
-        all_logits.append(logits)
-        idx_points.append(data['input_inds'])
-    all_logits = torch.cat(all_logits, dim=0).transpose(1, 2).reshape(-1, cfg.num_classes)
-    idx_points = torch.cat(idx_points, dim=0).flatten()
+        with batch_stats_for_eval(model) if cfg.get('eval_bn_batch_stats', False) else nullcontext():
+            logits = model(data)
+        add_sphere_votes(logit_sums, vote_counts, logits.float(), data['cloud_index'],
+                         data['input_inds'], data['mask'])
 
-    if cfg.distributed:
-        dist.all_reduce(all_logits), dist.all_reduce(idx_points)
-
-    # average overlapped predictions to subsampled points
-    all_logits = scatter(all_logits, idx_points, dim=0, reduce='mean')
-
-    # now, project the original points to the subsampled points
-    # these two targets would be very similar but not the same
-    # val_points_targets = all_targets[val_points_projections]
-    # torch.allclose(val_points_labels, val_points_targets)
-    all_logits = all_logits.argmax(dim=1)
-    val_points_labels = torch.from_numpy(val_loader.dataset.clouds_points_labels[0]).squeeze(-1).to(all_logits.device)
-    val_points_projections = torch.from_numpy(val_loader.dataset.projections[0]).to(all_logits.device).long()
-    val_points_preds = all_logits[val_points_projections]
-
-    del all_logits, idx_points
-    torch.cuda.empty_cache()
-
-    cm.update(val_points_preds, val_points_labels)
+    coverage = []
+    for cloud_index, (logit_sum, vote_count) in enumerate(zip(logit_sums, vote_counts)):
+        averaged, covered = averaged_cloud_logits(logit_sum, vote_count)
+        ratio = covered.float().mean().item()
+        coverage.append(ratio)
+        area = val_loader.dataset.clouds[cloud_index].get('area', str(cloud_index))
+        logging.info(f'Validation coverage {area}: {covered.sum().item()}/{len(covered)} ({ratio:.2%})')
+        projection = torch.as_tensor(np.asarray(val_loader.dataset.projections[cloud_index]),
+                                     device=device, dtype=torch.long)
+        labels = torch.as_tensor(np.asarray(val_loader.dataset.clouds_points_labels[cloud_index]),
+                                 device=device, dtype=torch.long).reshape(-1)
+        raw_covered = covered[projection]
+        raw_predictions = averaged.argmax(dim=1)[projection]
+        reference_cm.update(raw_predictions, labels)
+        logging.info(f'Validation raw coverage {area}: {raw_covered.sum().item()}/{len(raw_covered)} '
+                     f'({raw_covered.float().mean().item():.2%})')
+        if bool(raw_covered.any()):
+            cm.update(raw_predictions[raw_covered], labels[raw_covered])
+    if cfg.get('validation_require_full_coverage', False) and any(value < 1.0 for value in coverage):
+        formatted = ', '.join(f'{value:.2%}' for value in coverage)
+        raise RuntimeError(f'Incomplete validation coverage ({formatted}); increase dataset.val.num_steps')
+    minimum_coverage = float(cfg.get('validation_min_coverage', 0.0))
+    if any(value < minimum_coverage for value in coverage):
+        formatted = ', '.join(f'{value:.2%}' for value in coverage)
+        raise RuntimeError(
+            f'Validation coverage ({formatted}) is below the configured '
+            f'{minimum_coverage:.2%} floor; increase dataset.val.num_steps')
+    if any(value < 1.0 for value in coverage):
+        logging.warning(
+            'Validation metrics exclude raw points whose subsampled representatives '
+            'received no votes; see the per-area coverage values above.')
     miou, macc, oa, ious, accs = cm.all_metrics()
+    reference_miou, _, _, _, _ = reference_cm.all_metrics()
+    logging.info('Reference PSNet5 full-raw mIoU %.2f; raw points without votes '
+                 'inherit zero logits and predict class 0.', reference_miou)
 
     if cfg.get('visualize', False):
         dataset_name = cfg.dataset.common.NAME.lower()
-        coord = val_loader.dataset.clouds_points[0]
-        colors = val_loader.dataset.clouds_points_colors[0].astype(np.float32)
-        gt = val_points_labels.cpu().numpy().squeeze()
-        pred = val_points_preds.cpu().numpy().squeeze()
-        gt = cfg.cmap[gt, :]
-        pred = cfg.cmap[pred, :]
-        # output pred labels
-        # save per room
-        rooms = val_loader.dataset.clouds_rooms[0]
-
-        for idx in tqdm(range(len(rooms)-1), desc='save visualization'):
-            start_idx, end_idx = rooms[idx], rooms[idx+1]
-            write_obj(coord[start_idx:end_idx], colors[start_idx:end_idx],
-                        os.path.join(cfg.vis_dir, f'input-{dataset_name}-{idx}.obj'))
-            # output ground truth labels
-            write_obj(coord[start_idx:end_idx], gt[start_idx:end_idx],
-                        os.path.join(cfg.vis_dir, f'gt-{dataset_name}-{idx}.obj'))
-            # output pred labels
-            write_obj(coord[start_idx:end_idx], pred[start_idx:end_idx],
-                        os.path.join(cfg.vis_dir, f'{cfg.cfg_basename}-{dataset_name}-{idx}.obj'))
+        logging.warning('Sphere visualization is disabled for multi-cloud PSNet5 validation')
     return miou, macc, oa, ious, accs
 
 
