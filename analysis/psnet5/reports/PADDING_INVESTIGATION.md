@@ -53,7 +53,7 @@ docker run --rm --gpus all --ipc=host \
   -v /home/blau/projects/pcm-psnet5-project:/workspace/pcm-psnet5-project \
   -w /workspace/pcm-psnet5-project/PointCloudMamba \
   pointcloudmamba:latest \
-  python analysis/psnet5/check_compaction_schedule.py \
+  python analysis/psnet5/diagnostics/check_compaction_schedule.py \
     --epochs 10 \
     --output analysis/psnet5/results/compaction_schedule_10epochs.json
 ```
@@ -74,7 +74,7 @@ docker run --rm --gpus all --ipc=host \
   -v /home/blau/projects/pcm-psnet5-project:/workspace/pcm-psnet5-project \
   -w /workspace/pcm-psnet5-project/PointCloudMamba \
   pointcloudmamba:latest \
-  python analysis/psnet5/check_padding_sensitivity.py \
+  python analysis/psnet5/diagnostics/check_padding_sensitivity.py \
     --checkpoint log/psnet5/psnet5-train-PCM-ngpus1-20260921-015453-TaGtTm9SrUhiW7w5mT6bo3/checkpoint/psnet5-train-PCM-ngpus1-20260921-015453-TaGtTm9SrUhiW7w5mT6bo3_ckpt_best.pth \
     --variants 3 \
     --output analysis/psnet5/results/padding_sensitivity_epoch85.json

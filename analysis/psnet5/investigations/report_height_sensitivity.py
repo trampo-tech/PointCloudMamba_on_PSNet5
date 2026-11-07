@@ -1,7 +1,7 @@
 """Summarize a completed paired height-offset experiment."""
 from pathlib import Path
 import json,csv
-ROOT=Path(__file__).resolve().parents[2];OUT=ROOT/'analysis/psnet5/results/height_sensitivity_dev'
+ROOT=Path(__file__).resolve().parents[3];OUT=ROOT/'analysis/psnet5/results/height_sensitivity_dev'
 results=json.loads((OUT/'summary.json').read_text());assert len(results)==10,'Both checkpoints must finish all five conditions'
 rows=[];lines=['# Height-feature sensitivity on development validation','','Two checkpoints, each evaluated on the same fixed 2,000 development-validation spheres in Areas 1, 2 and 4. Height-feature offsets only: −0.50, −0.25, 0, +0.25 and +0.50 m. XYZ geometry, RGB, point masks, sphere order and vote accumulation are unchanged. Random states are restored before each condition within a sphere. Current-sphere BatchNorm is used without updating running statistics. Area 3 is not accessed.','','## Results','','| Checkpoint | Offset m | mIoU % | Change pp | Tank recall % | Prediction flips % |','|---|---:|---:|---:|---:|---:|']
 for name in ['weighted_best','classmix_latest']:

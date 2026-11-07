@@ -32,9 +32,9 @@ The local dataset README does not explicitly confirm physical units. This report
 
 ## Class distribution
 
-![Raw and subsampled class counts](results/class_distribution.png)
+![Raw and subsampled class counts](../results/class_distribution.png)
 
-![Per-area proportions](results/class_heatmap.png)
+![Per-area proportions](../results/class_heatmap.png)
 
 | Class | Raw points | Subsampled points | Retained |
 |---|---:|---:|---:|
@@ -81,7 +81,7 @@ The audit examined **200 recorded baseline neighborhoods per area**, or 800 in t
 | Area_3 | 354 / 2,980 / 12,521 | 100.0% | 0.0% |
 | Area_4 | 281 / 3,296 / 9,741 | 100.0% | 0.0% |
 
-![Neighborhood sizes](results/neighborhood_sizes.png)
+![Neighborhood sizes](../results/neighborhood_sizes.png)
 
 799 of 800 examined neighborhoods require padding. One sampled Area 1 neighborhood contains only one unique point. Padding repeats existing points and the baseline marks those repetitions with a validity mask. The fixed tensor size is consequently much larger than the number of distinct measurements in most sampled neighborhoods.
 
@@ -91,31 +91,31 @@ XY previews can hide vertical overlap and do not establish expert annotation cor
 
 ### Area_1: Chiller House
 
-![Area_1 RGB and labels](results/Area_1_overview.png)
+![Area_1 RGB and labels](../results/Area_1_overview.png)
 
-![Area_1 pump neighborhood](results/Area_1_sample_pump.png)
+![Area_1 pump neighborhood](../results/Area_1_sample_pump.png)
 
 ### Area_2: On-Site Chlorine Generation
 
-![Area_2 RGB and labels](results/Area_2_overview.png)
+![Area_2 RGB and labels](../results/Area_2_overview.png)
 
-![Area_2 pump neighborhood](results/Area_2_sample_pump.png)
+![Area_2 pump neighborhood](../results/Area_2_sample_pump.png)
 
-![Area_2 tank neighborhood](results/Area_2_sample_tank.png)
+![Area_2 tank neighborhood](../results/Area_2_sample_tank.png)
 
 ### Area_3: Sludge Press House
 
-![Area_3 RGB and labels](results/Area_3_overview.png)
+![Area_3 RGB and labels](../results/Area_3_overview.png)
 
-![Area_3 pump neighborhood](results/Area_3_sample_pump.png)
+![Area_3 pump neighborhood](../results/Area_3_sample_pump.png)
 
-![Area_3 tank neighborhood](results/Area_3_sample_tank.png)
+![Area_3 tank neighborhood](../results/Area_3_sample_tank.png)
 
 ### Area_4: Wash-water Recovery Tank
 
-![Area_4 RGB and labels](results/Area_4_overview.png)
+![Area_4 RGB and labels](../results/Area_4_overview.png)
 
-![Area_4 pump neighborhood](results/Area_4_sample_pump.png)
+![Area_4 pump neighborhood](../results/Area_4_sample_pump.png)
 
 ## Training, validation and test partitions
 
@@ -162,11 +162,11 @@ The loader protocol partitions raw points before voxelization and restricts each
 
 The result is a **point-disjoint spatial split**, not an object-disjoint split: a long pipe or beam can extend across the boundary even though its individual points belong to different sets. Points close to the boundary can also receive limited prediction coverage because nearby centers are excluded. The subsampled fractions and center counts above were measured on verified whole-scene voxel caches; independent partition voxelization can change voxels near the boundary. The raw-point membership totals are exact.
 
-![Area_1 split](results/Area_1_split.png)
+![Area_1 split](../results/Area_1_split.png)
 
-![Area_2 split](results/Area_2_split.png)
+![Area_2 split](../results/Area_2_split.png)
 
-![Area_4 split](results/Area_4_split.png)
+![Area_4 split](../results/Area_4_split.png)
 
 ## Reproducibility
 
@@ -174,6 +174,6 @@ The fixed split is recorded in `split.json`. Raw-point ownership masks are store
 
 For model development, the spatial validation regions remain separate from training. After model selection, the benchmark protocol retrains on all of Areas 1, 2 and 4 and evaluates on Area 3.
 
-Audit seed: 20260912. Sampling statistics use 200 recorded baseline neighborhoods per area; class-centered close-ups are illustrative. The accompanying scripts are `audit.py`, `verify_subsampling.py` and `finalize_split.py`.
+Audit seed: 20260912. Sampling statistics use 200 recorded baseline neighborhoods per area; class-centered close-ups are illustrative. The accompanying scripts are `../dataset/audit.py`, `../dataset/verify_subsampling.py` and `../dataset/finalize_split.py`.
 
 Evidence: inventory.json, summary.json, class_counts.csv, sampling.json, subsampling_verification.json and split_validation.json in results/.

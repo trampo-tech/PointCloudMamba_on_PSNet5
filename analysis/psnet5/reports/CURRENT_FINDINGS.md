@@ -2,7 +2,7 @@
 
 Updated October 21, 2026.
 
-![Area 3 mIoU and per-class comparisons](current_findings_figures/area3_comparison.png)
+![Area 3 mIoU and per-class comparisons](../current_findings_figures/area3_comparison.png)
 
 ## What improved the model
 
@@ -33,7 +33,7 @@ Retain weighted CE as the reference. Before adding complexity, prioritize label/
 
 ## Supporting records
 
-- [Weighted CE visual report](weighted_ce_40_report/REPORT.md) and [evaluation metrics](results/weighted_ce_epoch39_area3/summary.json).
-- [Spatial error diagnosis](results/classmix_spatial_analysis/REPORT.md).
-- [Height-offset experiment](results/height_sensitivity_dev/REPORT.md).
-- [Training exposure and context](results/training_exposure_analysis/REPORT.md).
+- [Weighted CE visual report](../weighted_ce_40_report/REPORT.md) and [evaluation metrics](../results/weighted_ce_epoch39_area3/summary.json).
+- [Spatial error diagnosis](../results/classmix_spatial_analysis/REPORT.md).
+- [Height-offset experiment](../results/height_sensitivity_dev/REPORT.md).
+- [Training exposure and context](../results/training_exposure_analysis/REPORT.md).

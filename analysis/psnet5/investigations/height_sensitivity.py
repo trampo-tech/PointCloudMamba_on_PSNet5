@@ -3,7 +3,7 @@ from pathlib import Path
 import sys,json,time,random,csv
 import numpy as np
 import torch
-ROOT=Path(__file__).resolve().parents[2];sys.path.insert(0,str(ROOT))
+ROOT=Path(__file__).resolve().parents[3];sys.path.insert(0,str(ROOT))
 from analysis.psnet5.evaluate_multivote import load_checkpoint,projected_results,metrics_from_confusion,write_confusion
 from openpoints.dataset import build_dataloader_from_cfg,get_features_by_keys
 from openpoints.dataset.psnet5.voting import add_sphere_votes

@@ -8,7 +8,7 @@ import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 from matplotlib.colors import ListedColormap
-ROOT=Path(__file__).resolve().parents[2];CACHE=ROOT/'data/PSNet5/processed_pcm/psnet5sphere_development_psnet5-spatial-v1_train_v0.040';OUT=ROOT/'analysis/psnet5/results/training_exposure_analysis';OUT.mkdir(exist_ok=True)
+ROOT=Path(__file__).resolve().parents[3];CACHE=ROOT/'data/PSNet5/processed_pcm/psnet5sphere_development_psnet5-spatial-v1_train_v0.040';OUT=ROOT/'analysis/psnet5/results/training_exposure_analysis';OUT.mkdir(exist_ok=True)
 NAMES=['ibeam','pipe','pump','rectangularbeam','tank'];COLORS=['#d55e00','#0072b2','#cc79a7','#009e73','#e6ab02'];CMAP=ListedColormap(COLORS)
 manifest=json.loads((CACHE/'manifest.json').read_text());clouds=[]
 for i,record in enumerate(manifest['clouds']):

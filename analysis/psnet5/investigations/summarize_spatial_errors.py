@@ -2,7 +2,7 @@
 from pathlib import Path
 import json,csv
 import numpy as np
-ROOT=Path(__file__).resolve().parents[2];R=ROOT/'analysis/psnet5/results';out=R/'classmix_spatial_analysis';cache=ROOT/'data/PSNet5/processed_pcm/psnet5sphere_benchmark_benchmark-area-v1_test_v0.040';train=ROOT/'data/PSNet5/processed_pcm/psnet5sphere_development_psnet5-spatial-v1_train_v0.040'
+ROOT=Path(__file__).resolve().parents[3];R=ROOT/'analysis/psnet5/results';out=R/'classmix_spatial_analysis';cache=ROOT/'data/PSNet5/processed_pcm/psnet5sphere_benchmark_benchmark-area-v1_test_v0.040';train=ROOT/'data/PSNet5/processed_pcm/psnet5sphere_development_psnet5-spatial-v1_train_v0.040'
 s=json.loads((out/'summary.json').read_text());names=['ibeam','pipe','pump','rectangularbeam','tank'];z=np.load(R/'classmix_epoch35_area3/Area_3_predictions.npz');present,first,count=np.unique(z['projection'],return_index=True,return_counts=True);xyz=np.load(cache/'cloud_0_sub_points.npy')[present];y=np.load(cache/'cloud_0_sub_labels.npy')[present]
 pred={k:np.load(R/run/'Area_3_predictions.npz')['prediction'][first] for k,run in [('best','weighted_ce_epoch39_area3'),('latest','classmix_epoch35_area3')]}
 rows=[]

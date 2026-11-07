@@ -7,7 +7,7 @@ read Area 3.
 
 PCM also compacts each sphere to valid points before encoding, so duplicated
 padding cannot influence grouping, Mamba context, decoding, or global pooling.
-See `analysis/psnet5/PADDING_INVESTIGATION.md` for the checkpoint diagnostic and
+See `analysis/psnet5/reports/PADDING_INVESTIGATION.md` for the checkpoint diagnostic and
 its limitations.
 
 Build the CPU subsampling extension once in the same environment used for

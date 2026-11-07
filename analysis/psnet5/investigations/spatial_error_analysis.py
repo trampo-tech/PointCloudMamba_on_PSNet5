@@ -9,7 +9,7 @@ import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 from matplotlib.colors import ListedColormap
-ROOT=Path(__file__).resolve().parents[2]
+ROOT=Path(__file__).resolve().parents[3]
 R=ROOT/'analysis/psnet5/results'; OUT=R/'classmix_spatial_analysis';OUT.mkdir(exist_ok=True)
 CACHE=ROOT/'data/PSNet5/processed_pcm/psnet5sphere_benchmark_benchmark-area-v1_test_v0.040'
 NAMES=['ibeam','pipe','pump','rectangularbeam','tank']

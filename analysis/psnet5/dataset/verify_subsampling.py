@@ -8,7 +8,7 @@ import numpy as np
 
 parser = argparse.ArgumentParser(description=__doc__)
 parser.add_argument('--baseline-root', type=Path, required=True)
-parser.add_argument('--output', type=Path, default=Path(__file__).parent / 'results/subsampling_verification.json')
+parser.add_argument('--output', type=Path, default=Path(__file__).resolve().parent.parent / 'results/subsampling_verification.json')
 args = parser.parse_args()
 sys.path.insert(0, str(args.baseline_root.resolve() / 'ops'))
 from cpp_wrappers.cpp_subsampling import grid_subsampling

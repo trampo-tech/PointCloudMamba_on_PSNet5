@@ -13,7 +13,7 @@ from audit import load, counts, preview, dump
 parser = argparse.ArgumentParser(description=__doc__)
 parser.add_argument('--data-root', type=Path, required=True)
 args = parser.parse_args()
-root = Path(__file__).parent
+root = Path(__file__).resolve().parent.parent
 out = root / 'results'
 manifest = json.loads((root / 'split.json').read_text())
 stats = {'version': manifest['version'], 'regions': []}

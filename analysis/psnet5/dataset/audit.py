@@ -57,7 +57,7 @@ def preview(points, labels, rgb, path, title, rng, centers=None, boundary=None):
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--data-root', type=Path, required=True)
-    parser.add_argument('--output', type=Path, default=Path(__file__).parent / 'results')
+    parser.add_argument('--output', type=Path, default=Path(__file__).resolve().parent.parent / 'results')
     parser.add_argument('--seed', type=int, default=20260912)
     parser.add_argument('--samples-per-area', type=int, default=200)
     args = parser.parse_args()
@@ -69,7 +69,7 @@ def main():
     root = args.data_root.resolve()
     summary = {'seed': args.seed, 'data_root': str(root), 'classes': CLASSES,
                'units': 'Not independently confirmed; baseline assumes meters.', 'areas': [], 'issues': []}
-    manifest = json.loads((Path(__file__).parent / 'split.json').read_text())
+    manifest = json.loads((Path(__file__).resolve().parent.parent / 'split.json').read_text())
     fixed_regions = {r['area']: r for r in manifest['regions']}
     manifest['regions'] = []
     sampling_rows = []

@@ -2,7 +2,7 @@ from pathlib import Path
 import json,csv
 import numpy as np
 from sklearn.neighbors import KDTree
-ROOT=Path(__file__).resolve().parents[2];R=ROOT/'analysis/psnet5/results';OUT=R/'training_exposure_analysis';TRAIN=ROOT/'data/PSNet5/processed_pcm/psnet5sphere_development_psnet5-spatial-v1_train_v0.040';s=json.loads((OUT/'summary.json').read_text());names=['ibeam','pipe','pump','rectangularbeam','tank']
+ROOT=Path(__file__).resolve().parents[3];R=ROOT/'analysis/psnet5/results';OUT=R/'training_exposure_analysis';TRAIN=ROOT/'data/PSNet5/processed_pcm/psnet5sphere_development_psnet5-spatial-v1_train_v0.040';s=json.loads((OUT/'summary.json').read_text());names=['ibeam','pipe','pump','rectangularbeam','tank']
 rows=list(csv.DictReader((OUT/'point_exposure.csv').open()));geometry=list(csv.DictReader((OUT/'geometry_exposure.csv').open()));sphere=list(csv.DictReader((OUT/'sphere_context.csv').open()))
 # Diagnose why training points are never visited relative to the center buffer.
 manifest=json.loads((TRAIN/'manifest.json').read_text());boundary=[]
